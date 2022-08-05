@@ -80,6 +80,7 @@ mongoose
             let ads = await adModel.find()
             //affichage
             //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
+            
             res.json(ads)
         })
 
