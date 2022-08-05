@@ -79,8 +79,8 @@ mongoose
             //récupération de tous les produits ds la bdd
             let ads = await adModel.find()
             //affichage
-            res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
-            //res.json(ads)
+            //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
+            res.json(ads)
         })
 
         /* app.get('/essai', (req, res) =>{
