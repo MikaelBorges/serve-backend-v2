@@ -14,16 +14,16 @@
 		<nav>
 
 			<a href="/"><i class="fa fa-home"></i>Home</a>
-                <% if (session.isLogged === false) { %>
-                	<a href="/user/register"><i class="fa fa-cogs"></i>S'inscrire</a>
-					<a href="/user/login"><i class="fa fa-cogs"></i>Connexion</a>
-                <% } else {%>
-                	<a href="/profil"><i class="fa fa-cogs"></i>Profil</a>
-                    <a href="/user/logout"><i class="fa fa-cogs"></i>Logout</a>
-                    <% if (session.isLogged === true && session.user.role === "admin") { %>
-                    <a href="/admin"><i class="fa fa-cogs"></i> Administration</a>
-                    <% } %>
-                <% } %>
+        <% if (session.isLogged === false) { %>
+          <a href="/user/register"><i class="fa fa-cogs"></i>S'inscrire</a>
+          <a href="/user/login"><i class="fa fa-cogs"></i>Connexion</a>
+        <% } else {%>
+          <a href="/profil"><i class="fa fa-cogs"></i>Profil</a>
+            <a href="/user/logout"><i class="fa fa-cogs"></i>Logout</a>
+            <% if (session.isLogged === true && session.user.role === "admin") { %>
+            <a href="/admin"><i class="fa fa-cogs"></i> Administration</a>
+            <% } %>
+        <% } %>
 		</nav>
 	</header>
 	<main>
