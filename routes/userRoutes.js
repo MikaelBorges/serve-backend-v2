@@ -44,33 +44,63 @@ module.exports = (app, db)=>{
     /*---------------------------------------*/
     
     //route get de login
-    app.get('/user/login', async (req, res, next)=>{
+    /* app.get('/user/login', async (req, res, next)=>{
         res.render('layout', {template: 'login', name: "Se connecter", session: req.session})
-    })
+    }) */
     
     
     /*---------------------------------------*/
-    
+
+    //route de login
+    /* app.post('/user/login', async (req,  res, next)=>{
+        let user = await userModel.getUserByMail(req.body.email);
+        if(user.length === 0) {
+            res.json({status: 404, msg: "email inexistant dans la base de donnée"})
+        } else {
+            if(user[0].validate === "no") {
+                res.json({status: 403, msg: "Votre compte n'est pas validé"})
+            }
+            let same = await bcrypt.compare(req.body.password, user[0].password);
+            if(same) {
+                let infos = {id: user[0].id, email: user[0].email}
+                let token = jwt.sign(infos, secret);
+                res.json({status: 200, msg: "connecté", token: token, user: user[0]})
+            } else {
+                res.json({status: 401, msg: "mauvais mot de passe"})
+            }
+        }
+    }) */
+
     //route post de login
     app.post('/user/login', async (req, res, next)=>{
+
         //on recup les infos du formulaire
         const {email, password} = req.body
-        /*
-            const email = req.body.email
-            const password = req.body.password
-        */
+        //const email = req.body.email
+        //const password = req.body.password
+
+        console.log('email : ', email)
+        console.log('password : ', password)
+
         try {
+
+            console.log('try')
+
             //on check si l'user existe dans la bdd avec son email
             let user = await userModel.findOne({email})
+
             //si il n'existe pas
             if(!user){
+                console.log('user not found')
                 //on retourne une erreur
                 res.status(400).json({message: "Email introuvable!"})
-            }    
+            }
             //on compare les mdp avec bcrypt renvoi true ou false
             const isMatch = await bcrypt.compare(password, user.hash)
+            console.log('isMatch', isMatch)
             //si ils ne sont pas les mm
             if(!isMatch){
+                console.log('error on password')
                 //on retourne une erreur
                 res.json({status: 400, message: "Mot de passe incorrect!"})
             }
@@ -81,15 +111,17 @@ module.exports = (app, db)=>{
                 lastname: user.lastname,
                 email: user.email,
                 role: user.role
-            }   
-            
+            }
+
+            //req.session.status = 200
             req.session.isLogged = true
-                
-            res.redirect('/')
+            console.log('req.session :')
+            console.log(req.session)
+            res.json(req.session)
         }catch(e){
+            console.log('erreur500')
             res.json({status: 500, message: "Erreur du serveur!"})
         }
-        
     })
     
     /*---------------------------------------*/

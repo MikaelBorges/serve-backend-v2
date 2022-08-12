@@ -58,15 +58,14 @@ const annoncesRoutes = require('./routes/annoncesRoutes');
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
-
-
+// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
 // Connexion à la base mongo :
 mongoose
-    //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-    .connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+    //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
     .then((db) => {
-        // Démarrage du serveur (qui ne démarre QUE si la connexion Ã  la base mongo est bien établie!)
+        // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
         console.log("CONNECTÉ")
 
         /* app.get('/', (req, res)=>{
@@ -80,7 +79,6 @@ mongoose
             let ads = await adModel.find()
             //affichage
             //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
-            
             res.json(ads)
         })
 
@@ -91,7 +89,8 @@ mongoose
         userRoutes(app, db)
         annoncesRoutes(app, db)
 
-        app.listen(process.env.PORT || 3306, function() {
+        //app.listen(process.env.PORT || 3306, function() {
+        app.listen(3306, function() {
             console.log("Le serveur écoute");
         });
     })
