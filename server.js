@@ -26,31 +26,31 @@ let session = require('express-session'),
 
 //session va gérer la création/vérification du token lors du login
 app.use(session({
-    secret: 'love kevin',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600000 }
+  secret: 'love kevin',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 3600000 }
 }))
 
 app.use(function (req, res, next) {
-    if (!req.session.user) {
-        req.session.user = null
-        req.session.isLogged = false
-    }
+  if (!req.session.user) {
+    req.session.user = null
+    req.session.isLogged = false
+  }
 
-    // get the url pathname   pathname est la section de chemin de l'URL, qui vient après l'hôte et avant la requête
-    let pathname = parseurl(req).pathname
-    //gestion des routes protégées
+  // get the url pathname   pathname est la section de chemin de l'URL, qui vient après l'hôte et avant la requête
+  let pathname = parseurl(req).pathname
+  //gestion des routes protégées
 
-    // routes uniquement pour l'admin
+  // routes uniquement pour l'admin
 
-    //conditions pour les accés aux routes avec restrictions qui redirigent vers le login si il n'est pas connecté ou admin
+  //conditions pour les accés aux routes avec restrictions qui redirigent vers le login si il n'est pas connecté ou admin
 
-    next()
+  next()
 })
 
-const userRoutes = require('./routes/userRoutes');
-const annoncesRoutes = require('./routes/annoncesRoutes');
+const userRoutes = require('./routes/userRoutes'),
+      annoncesRoutes = require('./routes/annoncesRoutes')
 
 
 
@@ -62,36 +62,36 @@ mongoose.Promise = global.Promise;
 const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
 // Connexion à la base mongo :
 mongoose
-    //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-    .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then((db) => {
-        // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
-        console.log("CONNECTÉ")
+  //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((db) => {
+    // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
+    console.log("CONNECTÉ")
 
-        /* app.get('/', (req, res)=>{
-            res.render('layout', {template: "home", name: "Home", session: req.session})
-        }) */
+    /* app.get('/', (req, res)=>{
+      res.render('layout', {template: "home", name: "Home", session: req.session})
+    }) */
 
-        let adModel = require('./models/annoncesModel');
-        //route get de tous les produits
-            app.get('/', async (req, res, next)=>{
-            //récupération de tous les produits ds la bdd
-            let ads = await adModel.find()
-            //affichage
-            //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
-            res.json(ads)
-        })
-
-        /* app.get('/essai', (req, res) =>{
-            res.json({post: "tueur", crimes: 322})
-        }) */
-        //appel de nos routes
-        userRoutes(app, db)
-        annoncesRoutes(app, db)
-
-        //app.listen(process.env.PORT || 3306, function() {
-        app.listen(3306, function() {
-            console.log("Le serveur écoute");
-        });
+    let adModel = require('./models/annoncesModel');
+    //route get de tous les produits
+      app.get('/', async (req, res, next)=>{
+      //récupération de tous les produits ds la bdd
+      let ads = await adModel.find()
+      //affichage
+      //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
+      res.json(ads)
     })
-    .catch(err => console.error(err.message));
+
+    /* app.get('/essai', (req, res) =>{
+        res.json({post: "tueur", crimes: 322})
+    }) */
+    //appel de nos routes
+    userRoutes(app, db)
+    annoncesRoutes(app, db)
+
+    //app.listen(process.env.PORT || 3306, function() {
+    app.listen(3306, function() {
+      console.log("Le serveur écoute");
+    });
+  })
+  .catch(err => console.error(err.message));
