@@ -39,7 +39,6 @@ app.use(session({
     maxAge: 1000 * 3600 * 24 * 365,
   },
   store,
-  viewCount: 0,
 }))
 
 app.use(function (req, res, next) {
