@@ -70,8 +70,8 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
-const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
+const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+// const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
 // Connexion à la base mongo :
 mongoose
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -107,6 +107,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT || 3306, function() {
+    //27017
     app.listen(3306, function() {
       console.log("serveur prêt");
     });
