@@ -39,7 +39,6 @@ app.use(session({
     maxAge: 1000 * 3600 * 24 * 365,
   },
   store,
-  viewCount: 0,
 }))
 
 app.use(function (req, res, next) {
@@ -108,7 +107,7 @@ mongoose
 
     //app.listen(process.env.PORT || 3306, function() {
     //27017
-    app.listen(3306, function() {
+    app.listen(27017, function() {
       console.log("serveur prêt");
     });
   })
