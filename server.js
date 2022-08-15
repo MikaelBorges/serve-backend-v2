@@ -1,5 +1,3 @@
-//require('dotenv').config()
-
 // IMPORTS :
 const cors = require('cors'),
       express = require('express'),
@@ -36,7 +34,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { 
     secure: false,
-    maxAge: 1000 * 3600 * 24 * 365,
+    maxAge: 1000 * 3600 * 24 * 365, // 1 an
   },
   //store,
 }))
@@ -51,8 +49,8 @@ app.use(function (req, res, next) {
   console.log(store)*/
 
   // get the url pathname   pathname est la section de chemin de l'URL, qui vient après l'hôte et avant la requête
-  //let pathname = parseurl(req).pathname
-  //gestion des routes protégées
+  // let pathname = parseurl(req).pathname
+  // gestion des routes protégées
 
   // routes uniquement pour l'admin
 
@@ -69,13 +67,24 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
 // const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+  console.log('hors ligne')
+}
+else {
+  console.log('en ligne')
+}
+
+
 // Connexion à la base mongo :
 mongoose
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
   //.connect(connectionString)
+  //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
@@ -106,8 +115,8 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT || 3306, function() {
-    app.listen(process.env.PORT, function() {
-      console.log("serveur prêt");
+    app.listen(process.env.PORT_DB, function() {
+      console.log("serveur prêt")
     });
   })
   .catch(err => console.error(err.message));
