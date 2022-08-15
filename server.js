@@ -74,8 +74,8 @@ const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongod
 // Connexion à la base mongo :
 mongoose
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  .connect(connectionString)
+  .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  //.connect(connectionString)
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
