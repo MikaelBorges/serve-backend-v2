@@ -106,7 +106,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT || 3306, function() {
-    app.listen(process.env.PORT || 3306, function() {
+    app.listen(process.env.PORT, function() {
       console.log("serveur prêt");
     });
   })
