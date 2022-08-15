@@ -78,6 +78,7 @@ else {
   console.log('en ligne')
 }
 
+require('dotenv').config();
 
 // Connexion à la base mongo :
 mongoose
