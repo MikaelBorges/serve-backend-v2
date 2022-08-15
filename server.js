@@ -67,17 +67,19 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
 // const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
+// let connectionString = '';
+const connectionString = process.env.MONGODB_URL
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
   console.log('mode hors ligne détecté')
-
+  //connectionString = process.env.MONGODB_URL;
 }
 else {
   console.log('mode en ligne détecté')
-  
+  //connectionString = process.env.MONGODB_URL;
 }
 
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
