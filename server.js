@@ -82,15 +82,15 @@ else {
 
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 console.log('process.env.MONGODB_URL', process.env.MONGODB_URL)
-console.log('process.env.PORT_DB', process.env.PORT_DB)
+console.log('process.env.PORT_LOCALHOST', process.env.PORT_LOCALHOST)
 console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
-  .connect(connectionString)
+  //.connect(connectionString) // online
+  //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true }) // offline
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  //.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URL || process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
