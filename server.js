@@ -71,24 +71,17 @@ let connectionString = '';
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
-  console.log('mode hors ligne détecté')
   connectionString = process.env.MONGODB_URL
 }
 else {
-  console.log('mode en ligne détecté')
   connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority'
 }
-
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
-console.log('process.env.MONGODB_URL', process.env.MONGODB_URL)
-console.log('process.env.PORT_LOCALHOST', process.env.PORT_LOCALHOST)
-console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
   //.connect(connectionString) // online
   //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true }) // offline
-  .connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true }) 
+  .connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true }) // twices cases
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
@@ -111,7 +104,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT_DB || 3306, function() {
-    app.listen(process.env.PORT || process.env.PORT_LOCALHOST, function() {
+    app.listen(process.env.PORT, function() {
       console.log("serveur prêt")
     });
   })
