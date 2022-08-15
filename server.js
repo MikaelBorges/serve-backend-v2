@@ -67,23 +67,22 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
 // const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
 
 if (process.env.NODE_ENV !== 'production') {
-  //require('dotenv').config()
-  console.log('hors ligne')
+  require('dotenv').config()
+  console.log('mode hors ligne détecté')
 }
 else {
-  console.log('en ligne')
+  console.log('mode en ligne détecté')
 }
 
 // Connexion à la base mongo :
 mongoose
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  //.connect(connectionString)
-  .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  //.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
@@ -92,7 +91,7 @@ mongoose
       res.render('layout', {template: "home", name: "Home", session: req.session})
     }) */
 
-    /* let adModel = require('./models/annoncesModel');
+    let adModel = require('./models/annoncesModel');
     //route get de tous les produits
       app.get('/', async (req, res, next)=>{
       // console.log('REQ')
@@ -101,10 +100,10 @@ mongoose
       // console.log(req.session)
       //récupération de tous les produits ds la bdd
       let ads = await adModel.find()
-      //affichage
-      //res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
+      // affichage
+      // res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
       res.json(ads)
-    }) */
+    })
 
     /* app.get('/essai', (req, res) =>{
         res.json({post: "tueur", crimes: 322})
@@ -114,7 +113,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT_DB || 3306, function() {
-    app.listen(process.env.PORT_DB || 3306, function() {
+    app.listen(process.env.PORT_DB, function() {
       console.log("serveur prêt")
     });
   })
