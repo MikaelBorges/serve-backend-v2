@@ -1,4 +1,4 @@
-require('dotenv').config()
+//require('dotenv').config()
 
 // IMPORTS :
 const cors = require('cors'),
