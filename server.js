@@ -87,10 +87,10 @@ console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
-  //.connect(connectionString) // online
+  .connect(connectionString) // online
   //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true }) // offline
   //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  .connect(process.env.MONGODB_URL)
+  //.connect(process.env.MONGODB_URL)
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
