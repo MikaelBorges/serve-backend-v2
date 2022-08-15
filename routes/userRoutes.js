@@ -6,19 +6,11 @@ const bcrypt = require('bcrypt'),
 
 module.exports = (app, db)=>{
 
-    let adModel = require('../models/annoncesModel')
-
-    //route get de toutes les annonces :
-    app.get('/', async (req, res, next)=>{
-      // console.log('REQ')
-      // console.log(req)
-      // console.log('REQ.SESSION')
-      // console.log(req.session)
-      let ads = await adModel.find()
-      // affichage
-      // res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
-      res.json(ads)
-    })
+  let adModel = require('../models/annoncesModel');
+  app.get('/', async (req, res, next)=>{
+    let ads = await adModel.find()
+    res.json(ads)
+  })
 
 
     /*---------------------------------------*/

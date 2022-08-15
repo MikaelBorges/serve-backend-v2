@@ -70,13 +70,22 @@ mongoose.Promise = global.Promise;
 // const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
 // const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
 
+
+
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
   console.log('mode hors ligne détecté')
+
 }
 else {
   console.log('mode en ligne détecté')
+  
 }
+
+console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+console.log('process.env.MONGODB_URL', process.env.MONGODB_URL)
+console.log('process.env.PORT_DB', process.env.PORT_DB)
+console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
@@ -91,19 +100,11 @@ mongoose
       res.render('layout', {template: "home", name: "Home", session: req.session})
     }) */
 
-    let adModel = require('./models/annoncesModel');
-    //route get de tous les produits
+    /* let adModel = require('./models/annoncesModel');
       app.get('/', async (req, res, next)=>{
-      // console.log('REQ')
-      // console.log(req)
-      // console.log('REQ.SESSION')
-      // console.log(req.session)
-      //récupération de tous les produits ds la bdd
       let ads = await adModel.find()
-      // affichage
-      // res.render('layout', {template: 'annonces', name: "Annonces", annonces: ads, session: req.session})
       res.json(ads)
-    })
+    }) */
 
     /* app.get('/essai', (req, res) =>{
         res.json({post: "tueur", crimes: 322})
@@ -113,7 +114,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT_DB || 3306, function() {
-    app.listen(process.env.PORT || process.env.PORT_DB, function() {
+    app.listen(process.env.PORT_DB || process.env.PORT, function() {
       console.log("serveur prêt")
     });
   })
