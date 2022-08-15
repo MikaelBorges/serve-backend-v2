@@ -67,10 +67,8 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-// const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
+const connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority';
 // const connectionString = 'mongodb://localhost:27017/Database?retryWrites=true&w=majority';
-
-
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -89,9 +87,9 @@ console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
-  //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
   //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
-  .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  //.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((db) => {
     // Démarrage du serveur (qui ne démarre QUE si la connexion à la base mongo est bien établie!)
     // console.log("CONNECTÉ")
@@ -114,7 +112,7 @@ mongoose
     annoncesRoutes(app, db)
 
     //app.listen(process.env.PORT_DB || 3306, function() {
-    app.listen(process.env.PORT || process.env.PORT_DB, function() {
+    app.listen(process.env.PORT || process.env.PORT_LOCALHOST, function() {
       console.log("serveur prêt")
     });
   })
