@@ -3,19 +3,19 @@ require('dotenv').config()
 // IMPORTS :
 const cors = require('cors'),
       express = require('express'),
-      mongoose = require('mongoose')
-      bodyParser = require('body-parser')
+      mongoose = require('mongoose')/*,
+      bodyParser = require('body-parser')*/
 
 
 // MIDDLEWARE :
 const app = express()
 //parse les url
-//app.use(express.urlencoded({ extended: false }))
-//app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
 app.use(cors())
 
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+/* app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json()) */
 
 //ici on recup tout le dossier pubic (css, fonts, img, js)
 /* app.use(express.static(__dirname + '/public'));
@@ -26,8 +26,8 @@ app.set('view engine', 'ejs'); */
 
 // SESSION :
 let session = require('express-session'),
-    parseurl = require('parseurl'),
-    store = new session.MemoryStore()
+    parseurl = require('parseurl')/*,
+    store = new session.MemoryStore()*/
 
 //session va gérer la création/vérification du token lors du login
 app.use(session({
@@ -38,7 +38,7 @@ app.use(session({
     secure: false,
     maxAge: 1000 * 3600 * 24 * 365,
   },
-  store,
+  //store,
 }))
 
 app.use(function (req, res, next) {
@@ -47,8 +47,8 @@ app.use(function (req, res, next) {
     req.session.isLogged = false
   }
 
-  console.log('MEMORY STORE')
-  console.log(store)
+  /*console.log('MEMORY STORE')
+  console.log(store)*/
 
   // get the url pathname   pathname est la section de chemin de l'URL, qui vient après l'hôte et avant la requête
   //let pathname = parseurl(req).pathname
@@ -108,7 +108,7 @@ mongoose
     // app.listen(process.env.PORT || 3306, function() {
     // 3306
     // 27017
-    app.listen(27017, function() {
+    app.listen(3306, function() {
       console.log("serveur prêt");
     });
   })
