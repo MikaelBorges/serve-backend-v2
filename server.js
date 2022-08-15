@@ -87,7 +87,8 @@ console.log('process.env.PORT', process.env.PORT)
 
 // Connexion à la base mongo :
 mongoose
-  .connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(connectionString)
+  //.connect(connectionString || connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
   //.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
   //.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((db) => {
