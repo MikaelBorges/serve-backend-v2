@@ -1,4 +1,4 @@
-//module pour crypter et comparer par un mot de passe
+// module pour crypter et comparer par un mot de passe
 const bcrypt = require('bcrypt'),
       saltRounds = 10
 
@@ -6,55 +6,157 @@ const bcrypt = require('bcrypt'),
 
 module.exports = (app, db)=>{
 
-  let adModel = require('../models/annoncesModel');
-  app.get('/', async (req, res, next)=>{
-    let ads = await adModel.find()
-    res.json(ads)
-  })
 
+    const userModel = require('../models/userModel')
 
-    /*---------------------------------------*/
-
-
-    let userModel = require('../models/userModel');
-
-    //route get de register
-    app.get('/user/register', async (req, res, next)=>{
+    // route get de register
+    /* app.get('/user/register', async (req, res, next) => {
         res.render('layout', {template: 'register', name: "S'enregistrer", session: req.session})
-    })
-    
-    
+    }) */
+
     /*---------------------------------------*/
-    
-    //route post de register
-    app.post('/user/register', async (req, res, next)=>{
-        //(en option vous pouvez checker si l'email existe pour refusé si il y'a déjà)
-        //on hash le password
-        let cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
-        //on crée la data (objet) que l'on balancera dans le schema
-        let user = {
-            firstname: req.body.firstName,
-            lastname: req.body.lastName,
-            email: req.body.email,
-            hash: cryptedPass,
-            role: "user"
-        }
-        //on va instancier notre model (schema) avec la data
-        let newUser = new userModel(user)
-        //on va sauvegarder le model avec .save()
-        newUser.save(function(err, doc){
-            if(err){
-                console.log('Echec ajout user ', err)
-            }
-            console.log("Utilisateur bien enregistré")
-        })
-        
-        //redirection vers l'accueil
-        res.redirect('/user/login')
+
+    // route post de register
+    app.post('/user/register', async (req, res, next) => {
+
+      console.log('le back reçoit bien la route de register')
+      console.log('req.body', req.body)
+
+      const { firstname, lastname, email, password } = req.body
+
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ message: 'email vide'})
+      }
+      if (!password || typeof password !== 'string') {
+        return res.status(400).json({ message: 'mot de passe vide'})
+      }
+      if (password.length < 5) {
+        return res.status(400).json({ message: 'mot de passe trop court'})
+      }
+
+      // on hash le password
+      const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
+
+      try {
+          /* const res = await userModel.create({
+            firstname: firstname,
+            lastname: lastname,
+            email : email,
+            hash : cryptedPass,
+          })
+          console.log('success', res)
+          //return res.status(200).json({message: "Votre compte a été créé"}) */
+
+
+
+
+
+// on crée la data (objet) que l'on balancera dans le schema
+let user = {
+  firstname: req.body.firstname,
+  lastname: req.body.lastname,
+  email: req.body.email,
+  hash: cryptedPass,
+  role: 'user',
+}
+// on va instancier notre model (schema) avec la data
+const newUser = new userModel(user)
+// on va sauvegarder le model avec .save()
+newUser.save(function(err, doc){
+  if(err) {
+      console.log('Echec ajout user ', err)
+  }
+  console.log("Utilisateur bien enregistré")
+})
+res.status(200).json({message: "Votre compte a bien été créé"})
+
+
+
+
+          /* // on check si l'user existe dans la bdd avec son email
+          let user = await userModel.findOne({email})
+          console.log('user',user)
+          // si il n'existe pas
+          if(!user) {
+              // on hash le password
+              const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
+              // on crée la data (objet) que l'on balancera dans le schema
+              let user = {
+                  firstname: req.body.firstname,
+                  lastname: req.body.lastname,
+                  email: req.body.email,
+                  hash: cryptedPass,
+                  role: 'user',
+              }
+              // on va instancier notre model (schema) avec la data
+              const newUser = new userModel(user)
+              // on va sauvegarder le model avec .save()
+              newUser.save(function(err, doc){
+                  if(err) {
+                      console.log('Echec ajout user ', err)
+                  }
+                  console.log("Utilisateur bien enregistré")
+              })
+              res.status(200).json({message: "Votre compte a bien été créé"})
+          }
+          else {
+              // si le mail existe deja, on retourne une erreur
+              res.status(400).json({message: "Cette addresse email est déjà utilisée"})
+          } */
+      } catch(error) {
+          if (error.code === 11000) {
+            console.log('Email déjà utilisé', error)
+            return res.status(400).json({message: "Email déjà utilisé"})
+          }
+          throw error
+      }
+
+
+
+
+
+
+
+
+      /* try {
+          // on check si l'user existe dans la bdd avec son email
+          let user = await userModel.findOne({email})
+          console.log('user',user)
+          // si il n'existe pas
+          if(!user) {
+              // on crée la data (objet) que l'on balancera dans le schema
+              let user = {
+                  firstname: req.body.firstname,
+                  lastname: req.body.lastname,
+                  email: req.body.email,
+                  hash: cryptedPass,
+                  role: 'user',
+              }
+              // on va instancier notre model (schema) avec la data
+              const newUser = new userModel(user)
+              // on va sauvegarder le model avec .save()
+              newUser.save(function(err, doc){
+                  if(err) {
+                      console.log('Echec ajout user ', err)
+                  }
+                  console.log("Utilisateur bien enregistré")
+              })
+              res.status(200).json({message: "Votre compte a bien été créé"})
+          }
+          else {
+              // si le mail existe deja, on retourne une erreur
+              res.status(400).json({message: "Cette addresse email est déjà utilisée"})
+          }
+      }
+      catch(e) {
+          console.log('erreur500')
+          res.json({status: 500, message: "Erreur du serveur!"})
+      } */
+
     })
     /*---------------------------------------*/
-    
-    //route get de login
+
+    // route get de login
     /* app.get('/user/login', async (req, res, next)=>{
         res.render('layout', {template: 'login', name: "Se connecter", session: req.session})
     }) */
@@ -83,7 +185,7 @@ module.exports = (app, db)=>{
     }) */
 
     //route post de login
-    app.post('/user/login', async (req, res, next)=>{
+    app.post('/user/login', async (req, res, next) => {
 
       console.log('le back reçoit la route de login')
 
@@ -93,93 +195,59 @@ module.exports = (app, db)=>{
       console.log('REQ.SESSION ID')
       console.log(req.sessionID)
 
-      //console.log('EMAIL')
-      console.log('EMAIL PASSWORD', req.body.email, req.body.password)
+      console.log('EMAIL')
+      console.log(req.body.email)
+
+      console.log('PASSWORD')
+      console.log(req.body.password)
 
       //on recup les infos du formulaire
-      //const {email, password} = req.body
-      //const email = req.body.email
-      //const password = req.body.password
+      const { email, password } = req.body
+      console.log('email', email)
+      console.log('password', password)
 
-      let email = ''
-      if (req.body.email === '') {
-        email = 'cf@gmail.com'
-      }
-      else {
-        email = req.body.email
-      }
-
-      //if (req.body.email) {
-        console.log('email renseigné')
-        if (req.session.isLogged) {
-          console.log('deja loggué, le back renvoie les infos de la session en json')
-          res.json(req.session)
-        }
-        else {
-          console.log('pas encore loggué')
-          if (req.body.password === '') {``
-            console.log('mot de passe ok')
-            req.session.isLogged = true
-            req.session.user = {
-              email: email,
-              password: req.body.password,
-              sessionID: req.sessionID,
-              isLogged: true,
-            }
-            console.log('loggué')
-            console.log('REQ.SESSION')
-            console.log(req.session)
-            res.json(req.session)
-          }
-          else {
-            req.json({
-              status: 403,
-              msg: 'Mauvais email ou mot de passe'
-            })
-          }
-        }
-      //}
-
-      /* try {
-
-          //console.log('try')
-
+      try {
           //on check si l'user existe dans la bdd avec son email
           let user = await userModel.findOne({email})
-
           //si il n'existe pas
-          if(!user){
-              console.log('user not found')
+          if(!user) {
               //on retourne une erreur
-              res.status(400).json({message: "Email introuvable!"})
+              res.status(400).json({message: "L'email est introuvable"})
           }
-          //on compare les mdp avec bcrypt renvoi true ou false
-          const isMatch = await bcrypt.compare(password, user.hash)
-          //console.log('isMatch', isMatch)
-          //si ils ne sont pas les mm
-          if(!isMatch){
-              console.log('error on password')
-              //on retourne une erreur
-              res.json({status: 400, message: "Mot de passe incorrect!"})
+          else {
+              //on retourne un succes
+              //res.status(200).json({message: "Email trouvé!"})
+              console.log('Email trouvé!')
+              //on compare les mdp avec bcrypt renvoi true ou false
+              const isMatch = await bcrypt.compare(password, user.hash)
+              //si ils ne sont pas les mm
+              if(!isMatch) {
+                  //on retourne une erreur
+                  res.status(400).json({message: "Le mot de passe est incorrect"})
+              }
+              else {
+                req.session.user = {
+                  id: user._id,
+                  firstname: user.firstname,
+                  lastname: user.lastname,
+                  email: user.email,
+                  role: user.role,
+                }
+                req.session.isLogged = true
+                res.status(200).json({session: req.session, message: "Le mot de passe est correct"})
+              }
           }
-          //création de la session utilisateur
-          req.session.user = {
-              id: user._id,
-              firstname: user.firstname,
-              lastname: user.lastname,
-              email: user.email,
-              role: user.role
-          }
-
-          //req.session.status = 200
-          req.session.isLogged = true
-          //console.log('req.session :')
-          //console.log(req.session)
-          res.json(req.session)
-      }catch(e){
+      }
+      catch(e) {
         console.log('erreur500')
         res.json({status: 500, message: "Erreur du serveur!"})
-      } */
+      }
+
+
+
+
+
+
     })
     
     /*---------------------------------------*/
