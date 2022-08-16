@@ -1,5 +1,15 @@
 module.exports = (app, db)=>{
-    let adModel = require('../models/annoncesModel');
+
+
+    // route get des annonces
+    const adModel = require('../models/annoncesModel')
+    app.get('/', async (req, res, next) => {
+        const ads = await adModel.find()
+        res.json(ads)
+    })
+
+
+    /*---------------------------------------*/
 
     //route get de tous les produits
     /* app.get('/annonces', async (req, res, next)=>{

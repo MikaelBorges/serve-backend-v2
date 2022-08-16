@@ -8,5 +8,5 @@ const AnnoncesSchema = mongoose.Schema({
     price: { type: String },
 });
 
-// Export du ModÃ¨le mongoose reprÃ©sentant un objet User
-module.exports = mongoose.model('Annonces', AnnoncesSchema);
+// Export du Modèle mongoose représentant un objet User
+module.exports = mongoose.model('Annonces', AnnoncesSchema)

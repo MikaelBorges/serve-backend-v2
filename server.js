@@ -90,12 +90,6 @@ mongoose
       res.render('layout', {template: "home", name: "Home", session: req.session})
     }) */
 
-    /* let adModel = require('./models/annoncesModel');
-      app.get('/', async (req, res, next)=>{
-      let ads = await adModel.find()
-      res.json(ads)
-    }) */
-
     /* app.get('/essai', (req, res) =>{
         res.json({post: "tueur", crimes: 322})
     }) */
