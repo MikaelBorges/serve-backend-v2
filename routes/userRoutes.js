@@ -7,7 +7,8 @@ const bcrypt = require('bcrypt'),
 module.exports = (app, db)=>{
 
 
-    const userModel = require('../models/userModel')
+    const userModel = require('../models/userModel'),
+          adModel = require('../models/annoncesModel')
 
     // route get de register
     /* app.get('/user/register', async (req, res, next) => {
@@ -47,62 +48,59 @@ module.exports = (app, db)=>{
           console.log('success', res)
           //return res.status(200).json({message: "Votre compte a été créé"}) */
 
+          /*===============================*/
 
-
-
-
-// on crée la data (objet) que l'on balancera dans le schema
-let user = {
-  firstname: req.body.firstname,
-  lastname: req.body.lastname,
-  email: req.body.email,
-  hash: cryptedPass,
-  role: 'user',
-}
-// on va instancier notre model (schema) avec la data
-const newUser = new userModel(user)
-// on va sauvegarder le model avec .save()
-newUser.save(function(err, doc){
-  if(err) {
-      console.log('Echec ajout user ', err)
-  }
-  console.log("Utilisateur bien enregistré")
-})
-res.status(200).json({message: "Votre compte a bien été créé"})
-
-
-
-
-          /* // on check si l'user existe dans la bdd avec son email
-          let user = await userModel.findOne({email})
-          console.log('user',user)
-          // si il n'existe pas
-          if(!user) {
-              // on hash le password
-              const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
-              // on crée la data (objet) que l'on balancera dans le schema
-              let user = {
-                  firstname: req.body.firstname,
-                  lastname: req.body.lastname,
-                  email: req.body.email,
-                  hash: cryptedPass,
-                  role: 'user',
-              }
-              // on va instancier notre model (schema) avec la data
-              const newUser = new userModel(user)
-              // on va sauvegarder le model avec .save()
-              newUser.save(function(err, doc){
-                  if(err) {
-                      console.log('Echec ajout user ', err)
-                  }
-                  console.log("Utilisateur bien enregistré")
-              })
-              res.status(200).json({message: "Votre compte a bien été créé"})
+          // on crée la data (objet) que l'on balancera dans le schema
+          let user = {
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            hash: cryptedPass,
+            role: 'user',
           }
-          else {
-              // si le mail existe deja, on retourne une erreur
-              res.status(400).json({message: "Cette addresse email est déjà utilisée"})
-          } */
+          // on va instancier notre model (schema) avec la data
+          const newUser = new userModel(user)
+          // on va sauvegarder le model avec .save()
+          newUser.save(function(err, doc){
+            if(err) {
+                console.log('Echec ajout user ', err)
+            }
+            console.log("Utilisateur bien enregistré")
+          })
+          res.status(200).json({message: "Votre compte a bien été créé"})
+
+          /*================================*/
+
+      /* // on check si l'user existe dans la bdd avec son email
+      let user = await userModel.findOne({email})
+      console.log('user',user)
+      // si il n'existe pas
+      if(!user) {
+          // on hash le password
+          const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
+          // on crée la data (objet) que l'on balancera dans le schema
+          let user = {
+              firstname: req.body.firstname,
+              lastname: req.body.lastname,
+              email: req.body.email,
+              hash: cryptedPass,
+              role: 'user',
+          }
+          // on va instancier notre model (schema) avec la data
+          const newUser = new userModel(user)
+          // on va sauvegarder le model avec .save()
+          newUser.save(function(err, doc){
+              if(err) {
+                  console.log('Echec ajout user ', err)
+              }
+              console.log("Utilisateur bien enregistré")
+          })
+          res.status(200).json({message: "Votre compte a bien été créé"})
+      }
+      else {
+          // si le mail existe deja, on retourne une erreur
+          res.status(400).json({message: "Cette addresse email est déjà utilisée"})
+      } */
       } catch(error) {
           if (error.code === 11000) {
             console.log('Email déjà utilisé', error)
@@ -110,13 +108,6 @@ res.status(200).json({message: "Votre compte a bien été créé"})
           }
           throw error
       }
-
-
-
-
-
-
-
 
       /* try {
           // on check si l'user existe dans la bdd avec son email
@@ -227,7 +218,7 @@ res.status(200).json({message: "Votre compte a bien été créé"})
               }
               else {
                 req.session.user = {
-                  id: user._id,
+                  _id: user._id,
                   firstname: user.firstname,
                   lastname: user.lastname,
                   email: user.email,
@@ -269,7 +260,7 @@ res.status(200).json({message: "Votre compte a bien été créé"})
             //res.json({status: 500, id: req.body.id, message: 'Echec déconnexion', result: err})
         }
         else {
-          res.json({id: req.body.id, message: 'Déconnexion bien effectuée'})
+          res.json({_id: req.body.id, message: 'Déconnexion bien effectuée'})
         }
         // res.redirect('/user/login')
       })
@@ -279,9 +270,9 @@ res.status(200).json({message: "Votre compte a bien été créé"})
     /*---------------------------------------*/
     
     //route pour afficher les infos du profil
-    app.get('/profil', async (req, res, next)=>{
+    /* app.get('/profil', async (req, res, next)=>{
         res.render('layout', {template: 'profil', session: req.session})
-    })
+    }) */
     
     /*---------------------------------------*/
     
@@ -296,4 +287,66 @@ res.status(200).json({message: "Votre compte a bien été créé"})
             res.json({status: 200, result: User})
         })
     })
+
+
+    /*----------------------------*/
+
+
+    // route get des annonces de l'user
+
+    app.get('/user/:id', async (req, res, next) => {
+
+        console.log("LE BACK A BIEN RECU LA ROUTE DE L'USER")
+
+        let id = req.params.id
+
+        try {
+            // on récup le produit par son id
+            let user = await userModel.findById(id)
+            console.log('user', user)
+            // si il ne trouve pas de user
+            if(!user) {
+                // on retourne une erreur
+                res.status(400).json({message: "User Not Exist"})
+            }
+            else {
+                // On récupère les annonces de l'user
+                const adsOfUser = await adModel.find({userId: id})
+
+                res.status(200).json(adsOfUser)
+              }
+
+            /* req.session.user = {
+              id: user._id,
+              firstname: user.firstname,
+              lastname: user.lastname,
+              email: user.email,
+              role: user.role,
+            }
+            req.session.isLogged = true
+            res.status(200).json({session: req.session, message: "Le mot de passe est correct"}) */
+        }
+        catch(error) {
+          console.log('erreur', error)
+          /*return*/ res.status(500).json({message: "Erreur du serveur!"})
+          throw error
+        }
+
+        /* catch(e) {
+          console.log('erreur500')
+          res.json({status: 500, message: "Erreur du serveur!"})
+        } */
+
+        /* catch(error) {
+            if (error.code === 11000) {
+              console.log('Email déjà utilisé', error)
+              return res.status(400).json({message: "Email déjà utilisé"})
+            }
+            throw error
+        } */
+
+
+    })
+
+
 }

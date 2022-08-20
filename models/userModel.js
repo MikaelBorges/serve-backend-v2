@@ -12,14 +12,14 @@ const UserSchema = mongoose.Schema(
         type: String,
         required: true,
         unique: true,
-        /* validate: {
+        validate: {
             validator: function(mailValue) {
                 // c.f. http://emailregex.com/
                 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 return emailRegExp.test(mailValue);
             },
             message: 'L\'adresse email {VALUE} n\'est pas une adresse RFC valide.'
-        } */
+        }
     },
     hash: { type: String, required: true },
     role: { type: String },
