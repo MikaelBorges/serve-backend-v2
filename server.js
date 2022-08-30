@@ -98,8 +98,9 @@ mongoose
     annoncesRoutes(app, db)
 
     console.log('process.env.PORT_DB', process.env.PORT_DB)
+    console.log('process.env.PORT', process.env.PORT)
 
-    app.listen(process.env.PORT_DB || '3306', function() {
+    app.listen(process.env.PORT_DB || 3306, function() {
     // app.listen(process.env.PORT, function() {
       console.log("serveur prêt")
     });
