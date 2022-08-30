@@ -97,6 +97,8 @@ mongoose
     userRoutes(app, db)
     annoncesRoutes(app, db)
 
+    /* Bien utiliser .PORT pour utiliser le port d'heroku
+    3306 c'est pour le local */
     app.listen(process.env.PORT || 3306, function() {
       console.log("serveur prêt")
     });
