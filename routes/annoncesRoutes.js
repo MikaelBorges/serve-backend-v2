@@ -1,26 +1,28 @@
-module.exports = (app, db)=>{
+const userModel = require('../models/userModel'),
+      adModel = require('../models/annoncesModel')
 
+module.exports = (app, db) => {
 
     // route get des annonces
-    const adModel = require('../models/annoncesModel')
     app.get('/', async (req, res, next) => {
-        const ads = await adModel.find()
-        res.json(ads)
+        const ads = await adModel.find(),
+              users = await userModel.find()
+        res.json({ads, users})
     })
-    
+
     /*---------------------------------------*/
 
     //une route post pour les annonces
     app.post('/user/ad/:id', async (req, res, next) => {
         let id = req.params.id
         console.log('id', id)
-        const { name, description, price } = req.body
-        console.log('name', name)
+        const { title, description, price } = req.body
+        console.log('title', title)
         console.log('description', description)
         console.log('price', price)
         //on crée l'objet du produit
         let newAd = {
-            name: name,
+            title: title,
             description: description,
             price: price + ' €',
             userId: req.params.id
