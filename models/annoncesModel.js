@@ -1,12 +1,19 @@
-//création d'un model dont le schéma possèdera les propriété name, description, price + ce que vous voulez
+//création d'un model dont le schéma possèdera les propriété title, description, price + ce que vous voulez
 const mongoose = require('mongoose')
 
 // Définition du "Schéma" d'un produit
 const AnnoncesSchema = mongoose.Schema({
-    name : { type: String },
+    title: { type: String },
     description: { type: String},
     price: { type: String },
     userId: { type: String },
+    firstname: { type: String },
+    lastname: { type: String },
+    superUser: { type: Boolean },
+    reviewsNb: { type: Number },
+    starsNb: { type: Number },
+    favoritesNb: { type: Number },
+    imageUser: { type: String },
 });
 
 // Export du Modèle mongoose représentant un objet User
