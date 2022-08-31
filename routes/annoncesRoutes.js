@@ -22,22 +22,29 @@ module.exports = (app, db) => {
         console.log('price', price)
         //on crée l'objet du produit
         let newAd = {
-            title: title,
-            description: description,
-            price: price + ' €',
-            userId: req.params.id
+          title: title,
+          description: description,
+          price: price + ' €',
+          userId: req.params.id,
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          superUser: req.body.superUser,
+          reviewsNb: req.body.reviewsNb,
+          starsNb: req.body.starsNb,
+          favoritesNb: 0,
+          imageUser: req.body.imageUser,
         }
         console.log('newAd', newAd)
         //on va instancier notre model (schema) avec l'objet
         let annonce = new adModel(newAd)
         //on va sauvegarder le model avec .save()
-        annonce.save(function(err, doc){
-            if(err){
-                console.log("Echec ajout annonce", err)
-            }
-            console.log("Nouvelle annonce bien ajoutée")
+        annonce.save(function(err, doc) {
+          if(err) {
+            console.log("Echec ajout annonce", err)
+          }
+          console.log("Nouvelle annonce bien ajoutée")
         })
-        res.status(200).json({message: "Votre annonce a bien été envoyée"})
+        res.status(200).json({message: 'Votre annonce a bien été envoyée'})
     })
 
     /*---------------------------------------*/
