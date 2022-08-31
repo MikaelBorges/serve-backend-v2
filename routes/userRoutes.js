@@ -17,6 +17,20 @@ module.exports = (app, db)=>{
 
     /*---------------------------------------*/
 
+    //route de modification d'une image
+    app.post('/user/updateImg', async (req, res, next) =>  {
+      const imageUser = req.body.imageUser
+      let imageRetrieved = await userModel.findOne({imageUser})
+
+      if(image === '') {
+        res.json({status: 500, error : imageRetrieved})
+      }
+
+      res.json({status: 200, result: imageRetrieved})
+    })
+
+    /*---------------------------------------*/
+
     // route post de register
     app.post('/user/register', async (req, res, next) => {
 
@@ -50,6 +64,10 @@ module.exports = (app, db)=>{
 
           /*===============================*/
 
+          /* let imageUser = req.body.imageUser
+          if(!req.body.imageUser) imageUser = 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png' */
+          const imageUser = req.body.imageUser ? req.body.imageUser : 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png'
+
           // on crée la data (objet) que l'on balancera dans le schema
           let user = {
             firstname: req.body.firstname,
@@ -57,6 +75,10 @@ module.exports = (app, db)=>{
             email: req.body.email,
             hash: cryptedPass,
             role: 'user',
+            imageUser: imageUser,
+            reviewsNb: 0,
+            starsNb: 0,
+            superUser: false,
           }
           // on va instancier notre model (schema) avec la data
           const newUser = new userModel(user)
@@ -223,6 +245,10 @@ module.exports = (app, db)=>{
                   lastname: user.lastname,
                   email: user.email,
                   role: user.role,
+                  imageUser: user.imageUser,
+                  reviewsNb: user.reviewsNb,
+                  starsNb: user.starsNb,
+                  superUser: user.superUser,
                 }
                 req.session.isLogged = true
                 res.status(200).json({session: req.session, message: "Le mot de passe est correct"})
