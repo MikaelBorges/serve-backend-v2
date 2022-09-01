@@ -14,12 +14,9 @@ module.exports = (app, db) => {
 
     //une route post pour les nouvelles annonces
     app.post('/user/ad/:id', async (req, res, next) => {
-        let id = req.params.id
-        console.log('id', id)
+
         const { title, description, price, imageAd, location } = req.body
-        console.log('title', title)
-        console.log('description', description)
-        console.log('price', price)
+        
 
         const day = new Date().getDay(),
               hour = new Date().getHours(),
@@ -28,7 +25,10 @@ module.exports = (app, db) => {
               minutes = new Date().getMinutes(),
 
               time = `${hour}:${minutes}`,
-              date = `${day}/${month}/${year}`
+              date = `${day}/${month}/${year}`,
+
+              imageWork = imageAd ? imageAd : 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png'
+
 
         // on crée l'objet du produit
         let newAd = {
@@ -43,7 +43,7 @@ module.exports = (app, db) => {
           starsNb: req.body.starsNb,
           favoritesNb: 0,
           imageUser: req.body.imageUser,
-          imageWork: imageAd,
+          imageWork: imageWork,
           location: location,
           dateOfPublication: date,
           timeOfPublication: time,
