@@ -87,9 +87,9 @@ module.exports = (app, db)=>{
             if(err) {
                 console.log('Echec ajout user ', err)
             }
-            console.log("Utilisateur bien enregistré")
+            console.log('Utilisateur bien enregistré')
           })
-          res.status(200).json({message: "Votre compte a bien été créé"})
+          res.status(200).json({message: 'Votre compte a bien été créé'})
 
           /*================================*/
 
@@ -126,7 +126,7 @@ module.exports = (app, db)=>{
       } catch(error) {
           if (error.code === 11000) {
             console.log('Email déjà utilisé', error)
-            return res.status(400).json({message: "Email déjà utilisé"})
+            return res.status(400).json({message: 'Email déjà utilisé'})
           }
           throw error
       }

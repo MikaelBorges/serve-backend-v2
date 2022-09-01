@@ -23,9 +23,9 @@ app.set('view engine', 'ejs'); */
 
 
 // SESSION :
-let session = require('express-session'),
-    parseurl = require('parseurl')/*,
-    store = new session.MemoryStore()*/
+let session = require('express-session')/* ,
+    parseurl = require('parseurl'),
+    store = new session.MemoryStore() */
 
 //session va gérer la création/vérification du token lors du login
 app.use(session({
@@ -100,7 +100,7 @@ mongoose
     // Bien utiliser .PORT pour utiliser le port d'heroku
     // 3306 c'est pour le local
     app.listen(process.env.PORT || 3306, function() {
-      console.log("serveur prêt")
+      console.log('serveur prêt')
     });
   })
   .catch(err => console.error(err.message));
