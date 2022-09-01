@@ -12,15 +12,25 @@ module.exports = (app, db) => {
 
     /*---------------------------------------*/
 
-    //une route post pour les annonces
+    //une route post pour les nouvelles annonces
     app.post('/user/ad/:id', async (req, res, next) => {
         let id = req.params.id
         console.log('id', id)
-        const { title, description, price } = req.body
+        const { title, description, price, imageAd, location } = req.body
         console.log('title', title)
         console.log('description', description)
         console.log('price', price)
-        //on crée l'objet du produit
+
+        const day = new Date().getDay(),
+              hour = new Date().getHours(),
+              month = new Date().getMonth(),
+              year = new Date().getFullYear(),
+              minutes = new Date().getMinutes(),
+
+              time = `${hour}:${minutes}`,
+              date = `${day}/${month}/${year}`
+
+        // on crée l'objet du produit
         let newAd = {
           title: title,
           description: description,
@@ -33,6 +43,10 @@ module.exports = (app, db) => {
           starsNb: req.body.starsNb,
           favoritesNb: 0,
           imageUser: req.body.imageUser,
+          imageWork: imageAd,
+          location: location,
+          dateOfPublication: date,
+          timeOfPublication: time,
         }
         console.log('newAd', newAd)
         //on va instancier notre model (schema) avec l'objet
