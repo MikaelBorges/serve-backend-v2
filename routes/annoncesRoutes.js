@@ -27,7 +27,7 @@ module.exports = (app, db) => {
               time = `${hour}:${minutes}`,
               date = `${day}/${month}/${year}`,
 
-              imageWork = imageAd ? imageAd : 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png'
+              imageWork = imageAd ? imageAd : 'https://travauxcasa.com/public/artiza/images/default.png'
 
 
         // on crée l'objet du produit
