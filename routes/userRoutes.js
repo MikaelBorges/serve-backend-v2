@@ -322,14 +322,14 @@ module.exports = (app, db)=>{
 
     app.get('/user/:id', async (req, res, next) => {
 
-        console.log("LE BACK A BIEN RECU LA ROUTE DE L'USER")
+        //console.log("LE BACK A BIEN RECU LA ROUTE DE L'USER")
 
         let id = req.params.id
 
         try {
             // on récup le produit par son id
             let user = await userModel.findById(id)
-            console.log('user', user)
+            //console.log('user', user)
             // si il ne trouve pas de user
             if(!user) {
                 // on retourne une erreur
