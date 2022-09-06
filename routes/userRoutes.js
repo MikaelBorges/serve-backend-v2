@@ -4,16 +4,48 @@ const bcrypt = require('bcrypt'),
 
 
 
-module.exports = (app, db)=>{
-
+module.exports = (app, db) => {
 
     const userModel = require('../models/userModel'),
           adModel = require('../models/annoncesModel')
 
     // route get de register
-    /* app.get('/user/register', async (req, res, next) => {
-        res.render('layout', {template: 'register', name: "S'enregistrer", session: req.session})
-    }) */
+    app.post('/addToFavorites', async (req, res, next) => {
+      const { adId, userId } = req.body
+      const user = await userModel.findOne({_id: userId})
+      if(!user) {
+        res.status(400).json({message: "L'user à l'initiative est introuvable"})
+      }
+      else {
+        // si absent du tableau alors on ajoute :
+        const index = user.favorites.indexOf(adId),
+              ad = await adModel.findOne({_id: adId})
+        if (index === -1) {
+          console.log('ajout')
+          await userModel.updateOne(
+            { _id: userId },
+            { $push: { favorites: adId } }
+          )
+          await adModel.updateOne(
+            { _id: adId },
+            { favoritesNb: ++ad.favoritesNb }
+          )
+          res.status(200).json({message: 'Annonce bien ajoutée aux favoris'})
+        }
+        else {
+          console.log('suppression')
+          await userModel.updateOne(
+            { _id: userId },
+            { $pull: { favorites: adId } }
+          )
+          await adModel.updateOne(
+            { _id: adId },
+            { favoritesNb: --ad.favoritesNb }
+          )
+          res.status(200).json({message: 'Annonce bien supprimée des favoris'})
+        }
+      }
+    })
 
     /*---------------------------------------*/
 
@@ -305,7 +337,7 @@ module.exports = (app, db)=>{
     //route get de récup de tous les utilisateurs
     app.get('/user/all', async (req, res, next)=>{
         //la fonction find de mongoose récup les utilisateurs dans la bdd
-        userModel.find({}, ["firstname", "lastname"], (err, User) =>{
+        userModel.find({}, ["firstname", "lastname"], (err, User) => {
             if(err){
                 res.json({status: 500, result: err})
             }
