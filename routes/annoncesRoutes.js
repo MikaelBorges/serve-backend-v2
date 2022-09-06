@@ -93,7 +93,7 @@ module.exports = (app, db) => {
     /*---------------------------------------*/
 
     //route post editProd
-    app.post('/editProd/:id', async (req, res, next) =>{
+    app.post('/editProd/:id', async (req, res, next) => {
         let id = req.params.id;
         // on appel une fonction de modification d'un produits (par son id) en lui envoyant un nouvel objet
         await adModel.updateOne({ _id: id }, {
@@ -143,13 +143,13 @@ module.exports = (app, db) => {
      /*---------------------------------------*/
 
     //route pour la page admin
-    app.get('/admin', async (req, res, next)=>{
+    app.get('/admin', async (req, res, next) => {
         //on récup tous les produits
         let ads = await adModel.find()
         //si il y'a une erreur
-        if(!ads){
+        if(!ads) {
             //on retourne la page d'admin avec un tableau vide pour les produits
-            res.render('layout', {template: 'admin', annonces: [],name: 'Administration', session: req.session})
+            res.render('layout', {template: 'admin', annonces: [], name: 'Administration', session: req.session})
         }
         //on affiche le template d'admin avec les produits
         res.render('layout', {template: 'admin', annonces: ads, name: 'Administration', session: req.session})

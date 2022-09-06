@@ -27,6 +27,7 @@ const UserSchema = mongoose.Schema(
     reviewsNb: { type: Number },
     starsNb: { type: Number },
     imageUser: { type: String },
+    favorites: { type: Array },
   },
   { collection: 'users' }
 )
