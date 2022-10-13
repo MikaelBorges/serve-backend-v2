@@ -26,11 +26,12 @@ module.exports = (app, db) => {
             { _id: userId },
             { $push: { favorites: adId } }
           )
+          const favNb = ++ad.favoritesNb
           await adModel.updateOne(
             { _id: adId },
-            { favoritesNb: ++ad.favoritesNb }
+            { favoritesNb: favNb }
           )
-          res.status(200).json({message: 'Annonce bien ajoutée aux favoris'})
+          res.status(200).json({newFavNumber: favNb, message: 'Annonce bien ajoutée aux favoris'})
         }
         else {
           console.log('suppression')
@@ -38,11 +39,12 @@ module.exports = (app, db) => {
             { _id: userId },
             { $pull: { favorites: adId } }
           )
+          const favNb = --ad.favoritesNb
           await adModel.updateOne(
             { _id: adId },
-            { favoritesNb: --ad.favoritesNb }
+            { favoritesNb: favNb }
           )
-          res.status(200).json({message: 'Annonce bien supprimée des favoris'})
+          res.status(200).json({newFavNumber: favNb, message: 'Annonce bien supprimée des favoris'})
         }
       }
     })
@@ -354,9 +356,10 @@ module.exports = (app, db) => {
 
     app.get('/user/:id', async (req, res, next) => {
 
-        //console.log("LE BACK A BIEN RECU LA ROUTE DE L'USER")
+        const id = req.params.id,
+              withLiteInfosOfUser = res.req.query.withLiteInfosOfUser
 
-        let id = req.params.id
+        console.log('withLiteInfosOfUser', withLiteInfosOfUser)
 
         try {
             // on récup le produit par son id
@@ -371,7 +374,23 @@ module.exports = (app, db) => {
                 // On récupère les annonces de l'user
                 const adsOfUser = await adModel.find({userId: id})
 
-                res.status(200).json(adsOfUser)
+                if(withLiteInfosOfUser === 'true') {
+                  const userInfos = await userModel.findById(id),
+                  liteInfos = {
+                    firstname: userInfos.firstname,
+                    lastname: userInfos.lastname,
+                    imageUser: userInfos.imageUser,
+                    superUser: userInfos.superUser,
+                    reviewsNb: userInfos.reviewsNb,
+                    starsNb: userInfos.starsNb,
+                  }
+                  res.status(200).json({adsOfUser, liteInfos})
+                } else {
+                  res.status(200).json({adsOfUser})
+                }
+
+
+
               }
 
             /* req.session.user = {
