@@ -359,7 +359,7 @@ module.exports = (app, db) => {
         const id = req.params.id,
               withLiteInfosOfUser = res.req.query.withLiteInfosOfUser
 
-        console.log('withLiteInfosOfUser', withLiteInfosOfUser)
+        // console.log('withLiteInfosOfUser', withLiteInfosOfUser)
 
         try {
             // on récup le produit par son id
