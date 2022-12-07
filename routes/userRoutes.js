@@ -52,7 +52,7 @@ module.exports = (app, db) => {
     /*---------------------------------------*/
 
     //route de modification d'une image
-    app.post('/user/updateImg', async (req, res, next) =>  {
+    /* app.post('/user/updateImg', async (req, res, next) =>  {
       const imageUser = req.body.imageUser
       let imageRetrieved = await userModel.findOne({imageUser})
 
@@ -61,7 +61,7 @@ module.exports = (app, db) => {
       }
 
       res.json({status: 200, result: imageRetrieved})
-    })
+    }) */
 
     /*---------------------------------------*/
 
@@ -337,7 +337,7 @@ module.exports = (app, db) => {
     /*---------------------------------------*/
     
     //route get de récup de tous les utilisateurs
-    app.get('/user/all', async (req, res, next)=>{
+    /* app.get('/user/all', async (req, res, next)=>{
         //la fonction find de mongoose récup les utilisateurs dans la bdd
         userModel.find({}, ["firstname", "lastname"], (err, User) => {
             if(err){
@@ -346,7 +346,7 @@ module.exports = (app, db) => {
             //console.log(User)
             res.json({status: 200, result: User})
         })
-    })
+    }) */
 
 
     /*----------------------------*/
