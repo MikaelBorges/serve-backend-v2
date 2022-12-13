@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 // IMPORTS :
 const cors = require('cors'),
       express = require('express'),
@@ -67,14 +69,11 @@ const userRoutes = require('./routes/userRoutes'),
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-let connectionString = '';
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-  connectionString = process.env.MONGODB_URL
-}
-else {
-  connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority'
+let connectionString = process.env.MONGODB_LOCAL_URL
+
+if (process.env.NODE_ENV === 'prod') {
+  connectionString = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority`
 }
 
 // Connexion à la base mongo :
