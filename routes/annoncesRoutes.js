@@ -17,8 +17,7 @@ module.exports = (app, db) => {
     app.post('/user/ad/:id', async (req, res, next) => {
 
         const year = new Date().getFullYear(),
-              { title, description, price, imageAd, location } = req.body,
-              imageWork = imageAd ? imageAd : 'https://travauxcasa.com/public/artiza/images/default.png'
+              { title, description, price, imagesAd, location } = req.body
 
         let day = new Date().getDate(),
             hours = new Date().getHours(),
@@ -47,7 +46,7 @@ module.exports = (app, db) => {
                 favoritesNb: 0,
                 views: 0,
                 imageUser: req.body.imageUser,
-                imageWork: imageWork,
+                imagesWork: imagesAd,
                 location: location,
                 dateOfPublication: date,
                 timeOfPublication: time,
