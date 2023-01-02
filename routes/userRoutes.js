@@ -71,7 +71,7 @@ module.exports = (app, db) => {
       console.log('le back reçoit bien la route de register')
       console.log('req.body', req.body)
 
-      const { firstname, lastname, email, password } = req.body
+      const { firstname, lastname, email, password, phone, image } = req.body
 
       if (!email || typeof email !== 'string') {
         return res.status(400).json({ message: 'email vide'})
@@ -100,19 +100,20 @@ module.exports = (app, db) => {
 
           /* let imageUser = req.body.imageUser
           if(!req.body.imageUser) imageUser = 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png' */
-          const imageUser = req.body.imageUser ? req.body.imageUser : 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png'
+          const imageUser = image ? image : 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png'
 
           // on crée la data (objet) que l'on balancera dans le schema
           let user = {
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            email: req.body.email,
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
             hash: cryptedPass,
             role: 'user',
             imageUser: imageUser,
             reviewsNb: 0,
             starsNb: 0,
             superUser: false,
+            tel: phone
           }
           // on va instancier notre model (schema) avec la data
           const newUser = new userModel(user)
@@ -372,7 +373,9 @@ module.exports = (app, db) => {
             }
             else {
                 // On récupère les annonces de l'user
-                const adsOfUser = await adModel.find({userId: id})
+                const adsOfUser = await adModel.find({userId: id}),
+                      noAds = adsOfUser.length ? false : true
+                console.log('noAds', noAds)
 
                 if(withLiteInfosOfUser === 'true') {
                   const userInfos = await userModel.findById(id),
@@ -384,13 +387,11 @@ module.exports = (app, db) => {
                     reviewsNb: userInfos.reviewsNb,
                     starsNb: userInfos.starsNb,
                   }
-                  res.status(200).json({adsOfUser, liteInfos})
+
+                  res.status(200).json({noAds, adsOfUser, liteInfos})
                 } else {
-                  res.status(200).json({adsOfUser})
+                  res.status(200).json({noAds, adsOfUser})
                 }
-
-
-
               }
 
             /* req.session.user = {

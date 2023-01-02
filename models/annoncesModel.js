@@ -14,7 +14,6 @@ const AnnoncesSchema = mongoose.Schema({
   starsNb: { type: Number },
   favoritesNb: { type: Number },
   imageUser: { type: String },
-  imageWork: { type: String },
   location: { type: String },
   dateOfPublication: { type: String },
   timeOfPublication: { type: String },
