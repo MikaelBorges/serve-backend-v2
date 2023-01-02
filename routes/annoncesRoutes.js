@@ -113,15 +113,19 @@ module.exports = (app, db) => {
 
     //une route de suppression d'un produit (attention: bien prendre l'id)
     app.post('/deleteAd', async (req, res, next) => {
-      const id = req.body.id
-      console.log('id annonce', id)
+      const idAnnonce = req.body.id
+      console.log('id annonce', idAnnonce)
 
       //on appel une fonction de suppression d'un produit (par son id)
-      adModel.findByIdAndDelete(id, function (err) {
+      adModel.findByIdAndDelete(idAnnonce, async function (err) {
         if(err) {
           console.log('Echec suppresion annonce', err)
           res.status(500).json({message: "Erreur dans la suppression de l'annonce"})
         } else {
+          await userModel.updateMany(
+            { favorites: { $in: [ idAnnonce ] } },
+            { $pull: { favorites: idAnnonce } }
+          )
           console.log('Annonce bien supprimée')
           res.status(200).json({message: 'Votre annonce a bien été suprimée'})
         }
