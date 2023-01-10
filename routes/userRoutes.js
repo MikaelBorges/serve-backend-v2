@@ -276,16 +276,18 @@ module.exports = (app, db) => {
               else {
                 req.session.user = {
                   _id: user._id,
-                  firstname: user.firstname,
-                  lastname: user.lastname,
-                  email: user.email,
                   role: user.role,
+                  email: user.email,
+                  starsNb: user.starsNb,
+                  lastname: user.lastname,
                   imageUser: user.imageUser,
                   reviewsNb: user.reviewsNb,
-                  starsNb: user.starsNb,
                   superUser: user.superUser,
+                  firstname: user.firstname,
                 }
+                // Session à récuperer dans le header.session côté front
                 req.session.isLogged = true
+                //res.status(200).json({message: "Le mot de passe est correct"})
                 res.status(200).json({session: req.session, message: "Le mot de passe est correct"})
               }
           }
@@ -301,7 +303,7 @@ module.exports = (app, db) => {
 
 
     })
-    
+
     /*---------------------------------------*/
     //route pour se déconnecter
     app.post('/user/logout', async (req, res, next)=>{

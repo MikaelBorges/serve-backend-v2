@@ -36,7 +36,7 @@ module.exports = (app, db) => {
               newAd = {
                 title: title,
                 description: description,
-                price: price + ' €',
+                price: price,
                 userId: req.params.id,
                 firstname: req.body.firstname,
                 lastname: req.body.lastname,
