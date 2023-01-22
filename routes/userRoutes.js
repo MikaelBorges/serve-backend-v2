@@ -1,8 +1,8 @@
 // module pour crypter et comparer par un mot de passe
 const bcrypt = require('bcrypt'),
       saltRounds = 10
-
-
+const jwt = require('jsonwebtoken');
+const secret = process.env.TOKEN_SECRET
 
 module.exports = (app, db) => {
 
@@ -274,7 +274,7 @@ module.exports = (app, db) => {
                   res.status(400).json({message: "Le mot de passe est incorrect"})
               }
               else {
-                req.session.user = {
+                const dataToUse = {
                   _id: user._id,
                   role: user.role,
                   email: user.email,
@@ -285,10 +285,14 @@ module.exports = (app, db) => {
                   superUser: user.superUser,
                   firstname: user.firstname,
                 }
+                const payload = dataToUse
+                const token = jwt.sign(payload, secret)
+                req.session.user = dataToUse
                 // Session à récuperer dans le header.session côté front
                 req.session.isLogged = true
                 //res.status(200).json({message: "Le mot de passe est correct"})
-                res.status(200).json({session: req.session, message: "Le mot de passe est correct"})
+                //res.status(200).json({session: req.session, message: "Le mot de passe est correct"})
+                res.status(200).json({session: req.session, token: token, message: "Le mot de passe est correct"})
               }
           }
       }
@@ -323,7 +327,7 @@ module.exports = (app, db) => {
             //res.json({status: 500, id: req.body.id, message: 'Echec déconnexion', result: err})
         }
         else {
-          res.json({_id: req.body.id, message: 'Déconnexion bien effectuée'})
+          res.json({_id: req.body.id, message: 'Session détruite côté backend, déconnexion bien effectuée'})
         }
         // res.redirect('/user/login')
       })
@@ -377,17 +381,17 @@ module.exports = (app, db) => {
                 // On récupère les annonces de l'user
                 const adsOfUser = await adModel.find({userId: id}),
                       noAds = adsOfUser.length ? false : true
-                console.log('noAds', noAds)
+                //console.log('noAds', noAds)
 
                 if(withLiteInfosOfUser === 'true') {
                   const userInfos = await userModel.findById(id),
                   liteInfos = {
-                    firstname: userInfos.firstname,
+                    starsNb: userInfos.starsNb,
                     lastname: userInfos.lastname,
+                    firstname: userInfos.firstname,
                     imageUser: userInfos.imageUser,
                     superUser: userInfos.superUser,
-                    reviewsNb: userInfos.reviewsNb,
-                    starsNb: userInfos.starsNb,
+                    reviewsNb: userInfos.reviewsNb
                   }
 
                   res.status(200).json({noAds, adsOfUser, liteInfos})
