@@ -284,6 +284,7 @@ module.exports = (app, db) => {
                   reviewsNb: user.reviewsNb,
                   superUser: user.superUser,
                   firstname: user.firstname,
+                  favorites: user.favorites
                 }
                 const payload = dataToUse
                 const token = jwt.sign(payload, secret)
