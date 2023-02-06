@@ -29,6 +29,8 @@ const UserSchema = mongoose.Schema(
     starsNb: { type: Number },
     imageUser: { type: String },
     favorites: { type: Array },
+    adsWithImages: { type: Number },
+    ads: { type: Array }
   },
   { collection: 'users' }
 )

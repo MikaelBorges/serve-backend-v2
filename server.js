@@ -61,8 +61,9 @@ app.use(function (req, res, next) {
   next()
 })
 
-const userRoutes = require('./routes/userRoutes'),
-      annoncesRoutes = require('./routes/annoncesRoutes')
+const authRoutes = require('./routes/authRoutes')
+const userRoutes = require('./routes/userRoutes')
+const annoncesRoutes = require('./routes/annoncesRoutes')
 
 
 // Configuration de l'objet Promise utilisé par mongoose (ici, ce seront celles dans Node.js -> global.Promise)
@@ -93,6 +94,7 @@ mongoose
         res.json({post: "tueur", crimes: 322})
     }) */
     //appel de nos routes
+    authRoutes(app, db)
     userRoutes(app, db)
     annoncesRoutes(app, db)
 

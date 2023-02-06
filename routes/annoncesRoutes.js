@@ -1,14 +1,17 @@
 /* const { format } = require('express/lib/response') */
-const userModel = require('../models/userModel'),
-      adModel = require('../models/annoncesModel')
+const userModel = require('../models/userModel')
+const adModel = require('../models/annoncesModel')
+
+const cloudinary = require('../utils/cloudinary')
 
 module.exports = (app, db) => {
 
     // route get des annonces
     app.get('/', async (req, res, next) => {
-        const ads = await adModel.find(),
-              users = await userModel.find()
-        res.json({ads, users})
+        const ads = await adModel.find()
+        const users = await userModel.find()
+        const noAds = ads.length ? false : true
+        res.json({ads, users, noAds})
     })
 
     /*---------------------------------------*/
@@ -16,8 +19,20 @@ module.exports = (app, db) => {
     //une route post pour les nouvelles annonces
     app.post('/user/ad/:id', async (req, res, next) => {
 
-        const year = new Date().getFullYear(),
-              { title, description, price, imagesAd, location } = req.body
+        const year = new Date().getFullYear()
+        const { 
+          userId,
+          title,
+          description,
+          price,
+          location,
+          firstname,
+          lastname,
+          superUser,
+          reviewsNb,
+          starsNb,
+          imageUser,
+          adHaveImages } = req.body
 
         let day = new Date().getDate(),
             hours = new Date().getHours(),
@@ -37,16 +52,15 @@ module.exports = (app, db) => {
                 title: title,
                 description: description,
                 price: price,
-                userId: req.params.id,
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                superUser: req.body.superUser,
-                reviewsNb: req.body.reviewsNb,
-                starsNb: req.body.starsNb,
+                userId: userId,
+                firstname: firstname,
+                lastname: lastname,
+                superUser: superUser,
+                reviewsNb: reviewsNb,
+                starsNb: starsNb,
                 favoritesNb: 0,
                 views: 0,
-                imageUser: req.body.imageUser,
-                imagesWork: imagesAd,
+                imageUser: imageUser,
                 location: location,
                 dateOfPublication: date,
                 timeOfPublication: time,
@@ -54,15 +68,131 @@ module.exports = (app, db) => {
 
         // on va instancier notre model (schema) avec l'objet
         const annonce = new adModel(newAd)
-        annonce.save(function(err, doc) {
-          if(err) {
-            console.log("Echec ajout annonce", err)
-            res.status(500).json({message: "Erreur dans l'envoi de votre annonce"})
-          } else {
-            console.log("Nouvelle annonce bien ajoutée")
-            res.status(200).json({message: 'Votre annonce a bien été envoyée'})
+        annonce.save(async function(err, doc) {
+          if(err) res.status(500).json({message: "Erreur dans l'envoi de votre annonce"})
+          else {
+            const adId = doc._id.toString()
+            const user = await userModel.findOne({_id: userId})
+            await userModel.updateOne(
+              { _id: userId },
+              { $push: { ads: adId } }
+            )
+            if(adHaveImages) {
+              const adsWithImagesRetrieved = user.adsWithImages ? user.adsWithImages : 0
+              const adsWithImages = adHaveImages ? adsWithImagesRetrieved + 1 : adsWithImagesRetrieved
+              await userModel.updateOne(
+                { _id: userId },
+                { adsWithImages: adsWithImages }
+              )
+            }
+            res.status(200).json({message: 'Votre annonce a bien été envoyée', adIdCreated: adId})
           }
         })
+    })
+
+    /*----------------------------------------------------*/
+
+    app.post('/testRoute', async (req, res, next) => {
+      /* const { imagesWork } = req.body
+      console.log('imagesWork', imagesWork)
+
+      const myArray = imagesWork[0].split("/")
+      console.log('myArray', myArray)
+      const lastElement = myArray[myArray.length - 1]
+      console.log('lastElement', lastElement)
+      const fileArray = lastElement.split(".")
+
+      console.log('fileArray[0]', fileArray[0]) */
+
+
+
+      /* cloudinary.api.delete_resources_by_prefix(`users/${userId}/ads/${adId}`, async function(err) {
+        if(err) res.status(500).json({message: err})
+        else res.status(200).json({message: 'Images bien suprimées'})
+      }) */
+      cloudinary.api
+      .delete_resources_by_prefix('users/62fc16903edbb27f94be99cf/ads/63df81cc7921fa18073b4004/isenaflseqrg50j6xo1a')
+      .then(result=>console.log(result))
+
+
+
+    })
+
+    app.post('/modifyAd', async (req, res, next) => {
+      const {
+        adId,
+        title,
+        price,
+        userId,
+        location,
+        description,
+        urlsAdImages,
+        adHaveImages,
+        compareIfSomeImagesMustBeDeleted } = req.body
+
+
+
+      const imagesWork = urlsAdImages.length ? urlsAdImages : []
+      console.log('IMAGES WORK', imagesWork)
+
+      const ad = await adModel.findOne({_id: adId})
+      const adHadImages = ad.imagesWork.length ? true : false
+      console.log('AD HAD IMAGES', adHadImages)
+
+
+      if(compareIfSomeImagesMustBeDeleted) {
+        const imagesWorkDb = ad.imagesWork
+        console.log('COMPARER')
+        imagesWorkDb.forEach((imageWorkDb) => {
+          const index = imagesWork.indexOf(imageWorkDb)
+          if (index === -1) {
+            const tempArray = imageWorkDb.split("/")
+            const lastElement = tempArray[tempArray.length - 1]
+            const file = lastElement.split(".")
+            const elementToDelete = file[0]
+            console.log('IMAGE A SUPPRIMER', elementToDelete)
+
+            cloudinary.api.delete_resources_by_prefix(`users/${userId}/ads/${adId}/${elementToDelete}`, async function(err) {
+              if(err) res.status(500).json({message: err})
+            })
+
+          }
+        })
+      }
+      else console.log('NE PAS COMPARER')
+
+
+      await adModel.updateOne({ _id: adId }, {
+        title: title,
+        price: price,
+        location: location,
+        imagesWork: imagesWork,
+        description: description
+      })
+
+      console.log('AD HAVE IMAGES', adHaveImages)
+
+      if(adHaveImages !== adHadImages) {
+        const user = await userModel.findOne({_id: userId})
+        let adsWithImages = 0
+        const adsWithImagesRetrieved = user.adsWithImages ? user.adsWithImages : 0
+        console.log('ADS WITH IMAGES RETRIEVED', adsWithImagesRetrieved)
+        if(adHaveImages) {
+          adsWithImages = adsWithImagesRetrieved + 1
+        }
+        else {
+          adsWithImages = adsWithImagesRetrieved - 1
+        }
+
+        console.log('ADS WITH IMAGES', adsWithImages)
+        await userModel.updateOne(
+          { _id: userId },
+          { adsWithImages: adsWithImages }
+        )
+      }
+
+      res.status(200).json({message: 'Annonce bien modifiée'})
+
     })
 
     /*---------------------------------------*/
@@ -85,9 +215,16 @@ module.exports = (app, db) => {
             message: "Server Error"
           })
         }
-        
-        
     }) */
+
+    app.post('/user/registerAdImages', async (req, res, next) => {
+      const { adIdCreated, urlsAdImages } = req.body
+      await adModel.updateOne(
+        { _id: adIdCreated },
+        { imagesWork: urlsAdImages }
+      )
+      res.status(200).json({message: "Photos de l'annonce bien enregistrées"})
+    })
 
     /*---------------------------------------*/
 
@@ -107,30 +244,76 @@ module.exports = (app, db) => {
 
     /*---------------------------------------*/
 
-    /* app.post('/deleteAd', async (req, res, next) => {
-      console.log('POST DELETE OK')
-    }) */
+    app.post('/deleteCloudinaryImages', async (req, res, next) => {
+      const { adId, userId, checkEmptyFolder } = req.body
+      console.log('userId', userId)
+      console.log('adId', adId)
+      cloudinary.api.delete_resources_by_prefix(`users/${userId}/ads/${adId}`, async function(err) {
+        if(!err) {
+          if(checkEmptyFolder) {
+            const user = await userModel.findOne({_id: userId})
+            let path = `users/${userId}/ads/${adId}`
+            if(user.adsWithImages === 1) path = `users/${userId}/ads`
+            cloudinary.api.delete_folder(path, function(err) {
+              if(err) res.status(500).json({message: err})
+              else {
+                console.log('Images bien suprimées')
+                res.status(200).json({message: 'Images bien suprimées'})
+              }
+            })
+          }
+          else {
+            console.log('Images bien suprimées')
+            res.status(200).json({message: 'Images bien suprimées'})
+          }
+        }
+        else res.status(500).json({message: 'Problème dans la suppression des images'})
+      })
+
+    })
 
     //une route de suppression d'un produit (attention: bien prendre l'id)
     app.post('/deleteAd', async (req, res, next) => {
-      const idAnnonce = req.body.id
-      console.log('id annonce', idAnnonce)
+      const { adId, userId, adHaveImages } = req.body
 
       //on appel une fonction de suppression d'un produit (par son id)
-      adModel.findByIdAndDelete(idAnnonce, async function (err) {
-        if(err) {
-          console.log('Echec suppresion annonce', err)
-          res.status(500).json({message: "Erreur dans la suppression de l'annonce"})
-        } else {
+      adModel.findByIdAndDelete(adId, async function (err) {
+        if(err) res.status(500).json({message: "Erreur dans la suppression de l'annonce"})
+        else {
           await userModel.updateMany(
-            { favorites: { $in: [ idAnnonce ] } },
-            { $pull: { favorites: idAnnonce } }
+            { favorites: { $in: [ adId ] } },
+            { $pull: { favorites: adId } }
           )
-          console.log('Annonce bien supprimée')
+          await userModel.updateOne(
+            { _id: userId },
+            { $pull: { ads: adId } }
+          )
+          if(adHaveImages) {
+            const user = await userModel.findOne({_id: userId})
+            cloudinary.api.delete_resources_by_prefix(`users/${userId}/ads/${adId}`, async function(err) {
+              if(!err) {
+                let path = `users/${userId}/ads/${adId}`
+                if(user.adsWithImages === 1) path = `users/${userId}/ads`
+                cloudinary.api.delete_folder(path, function(err) {
+                  if(err) console.log('err', err)
+                })
+              }
+              else console.log('err', err)
+            })
+            const adsWithImagesRetrieved = user.adsWithImages ? user.adsWithImages : 0
+            if(adsWithImagesRetrieved) {
+              const adsWithImages = adHaveImages ? adsWithImagesRetrieved - 1 : adsWithImagesRetrieved
+              await userModel.updateOne(
+                { _id: userId },
+                { adsWithImages: adsWithImages }
+              )
+            }
+          }
           res.status(200).json({message: 'Votre annonce a bien été suprimée'})
         }
       })
     })
+
     /* app.get('/deleteProd/:id', async (req, res, next) =>{
       let id = req.params.id;
       //on appel une fonction de suppression d'un produit (par son id)
@@ -142,6 +325,31 @@ module.exports = (app, db) => {
       //on redirige vers l'admin
       res.redirect('/admin');
     }) */
+
+    app.get('/retrieveUserAd/:id', async (req, res, next) => {
+      const id = req.params.id
+      console.log('ID', id)
+      try {
+        let ad = await adModel.findById(id)
+        
+        if(ad) {
+          const adOfUser = {
+            title: ad.title,
+            description: ad.description,
+            location: ad.location,
+            price: ad.price,
+            imagesWork: ad.imagesWork
+          }
+          console.log('AD OF USER', adOfUser)
+          res.status(200).json({adRetrieved: adOfUser, message: 'Annonce trouvée'})
+        }
+        else res.status(400).json({message: "Ad Not Exist"})
+      }
+      catch(error) {
+        res.status(500).json({message: "Erreur du serveur!"})
+        throw error
+      }
+    })
 
      /*---------------------------------------*/
 

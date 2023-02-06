@@ -1,9 +1,0 @@
-<section>
-	<h2><%= name %></h2>
-	<form action="/editProd/<%=produit._id%>" method="post">
-		<input type="text" name="name" placeholder="product name" value="<%=produit.name%>"/>
-		<textarea name="description" placeholder="product description"><%=produit.description%></textarea>
-		<input type="number" name="price" placeholder="price" value="<%=produit.price%>"/>
-		<input type="submit" name="S'enregistrer">
-	</form>
-</section>

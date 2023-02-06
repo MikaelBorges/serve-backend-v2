@@ -18,7 +18,7 @@ const AnnoncesSchema = mongoose.Schema({
   dateOfPublication: { type: String },
   timeOfPublication: { type: String },
   views: { type: Number },
-  imagesWork: { type: Array },
+  imagesWork: { type: Array }
 });
 
 // Export du Modèle mongoose représentant un objet User
