@@ -81,6 +81,40 @@ module.exports = (app, db) => {
     res.status(200).json({message: 'Photo de profil bien enregistrée'})
   })
 
+  app.post('/user/changeUserData/:id', async (req, res, next) => {
+    const userId = req.params.id
+    const { firstname, lastname, email, password, phone } = req.body
+    console.log('userId', userId)
+    console.log('req.body', req.body)
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ message: 'email vide'})
+    }
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({ message: 'mot de passe vide'})
+    }
+    if (password.length < 5) {
+      return res.status(400).json({ message: 'mot de passe trop court'})
+    }
+    const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
+    try {
+      await userModel.updateOne(
+        { _id: userId },
+        {
+          tel: phone,
+          email: email,
+          hash: cryptedPass,
+          lastname: lastname,
+          firstname: firstname
+        }
+      )
+      res.status(200).json({message: 'Votre compte a bien été modifié'})
+    }
+    catch(error) {
+      if (error.code === 11000) return res.status(400).json({message: 'Email déjà utilisé'})
+      throw error
+    }
+  })
+
   app.post('/user/register', async (req, res, next) => {
     const { firstname, lastname, email, password, phone } = req.body
     if (!email || typeof email !== 'string') {
