@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 // IMPORTS :
 const cors = require('cors'),
       express = require('express'),
@@ -59,22 +61,20 @@ app.use(function (req, res, next) {
   next()
 })
 
-const userRoutes = require('./routes/userRoutes'),
-      annoncesRoutes = require('./routes/annoncesRoutes')
+const authRoutes = require('./routes/authRoutes')
+const userRoutes = require('./routes/userRoutes')
+const annoncesRoutes = require('./routes/annoncesRoutes')
 
 
 // Configuration de l'objet Promise utilisé par mongoose (ici, ce seront celles dans Node.js -> global.Promise)
 mongoose.Promise = global.Promise;
 
 // Adapter en fonction de la configuration sur le compte "Atlas"
-let connectionString = '';
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-  connectionString = process.env.MONGODB_URL
-}
-else {
-  connectionString = 'mongodb+srv://Mikael:Mborges1984@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority'
+let connectionString = process.env.MONGODB_LOCAL_URL
+
+if (process.env.NODE_ENV === 'prod') {
+  connectionString = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority`
 }
 
 // Connexion à la base mongo :
@@ -94,6 +94,7 @@ mongoose
         res.json({post: "tueur", crimes: 322})
     }) */
     //appel de nos routes
+    authRoutes(app, db)
     userRoutes(app, db)
     annoncesRoutes(app, db)
 

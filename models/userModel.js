@@ -23,11 +23,14 @@ const UserSchema = mongoose.Schema(
     },
     hash: { type: String, required: true },
     role: { type: String },
+    tel: { type: String },
     superUser: { type: Boolean },
     reviewsNb: { type: Number },
     starsNb: { type: Number },
     imageUser: { type: String },
     favorites: { type: Array },
+    adsWithImages: { type: Number },
+    ads: { type: Array }
   },
   { collection: 'users' }
 )
