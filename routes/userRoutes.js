@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const secret = process.env.TOKEN_SECRET
 const withAuth = require('../withAuth')
-
 const cloudinary = require('../utils/cloudinary')
 
 module.exports = (app, db) => {
