@@ -73,6 +73,9 @@ mongoose.Promise = global.Promise;
 
 let connectionString = process.env.MONGODB_LOCAL_URL
 
+// Si dans le fichier .env on change la valeur de NODE_ENV et qu'on met
+// 'prod', on se connectera à la base de données en ligne
+// autre chose que 'prod', on se connectera à la base de données en locale
 if (process.env.NODE_ENV === 'prod') {
   connectionString = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.ioylj.mongodb.net/Database?retryWrites=true&w=majority`
 }
