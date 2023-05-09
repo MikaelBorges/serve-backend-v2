@@ -334,6 +334,9 @@ module.exports = (app, db) => {
         
         if(ad) {
           const adOfUser = {
+            _id: ad._id,
+            dateOfPublication: ad.dateOfPublication,
+            firstname: ad.firstname,
             title: ad.title,
             description: ad.description,
             location: ad.location,
