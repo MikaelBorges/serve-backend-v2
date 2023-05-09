@@ -185,6 +185,7 @@ module.exports = (app, db) => {
         }
     }
     catch(e) {
+      console.log('e', e)
       res.json({status: 500, message: "Erreur du serveur!"})
     }
 
