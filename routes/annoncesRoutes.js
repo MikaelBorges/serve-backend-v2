@@ -21,6 +21,7 @@ module.exports = (app, db) => {
 
         const year = new Date().getFullYear()
         const { 
+          tel,
           userId,
           title,
           description,
@@ -49,6 +50,7 @@ module.exports = (app, db) => {
 
               // on crée l'objet du produit
               newAd = {
+                tel: tel,
                 title: title,
                 description: description,
                 price: price,
@@ -331,10 +333,10 @@ module.exports = (app, db) => {
       console.log('ID', id)
       try {
         let ad = await adModel.findById(id)
-        
         if(ad) {
           const adOfUser = {
             _id: ad._id,
+            tel: ad.tel,
             userId: ad.userId,
             favoritesNb: ad.favoritesNb,
             dateOfPublication: ad.dateOfPublication,
@@ -345,7 +347,6 @@ module.exports = (app, db) => {
             price: ad.price,
             imagesWork: ad.imagesWork
           }
-          console.log('AD OF USER', adOfUser)
           res.status(200).json({adRetrieved: adOfUser, message: 'Annonce trouvée'})
         }
         else res.status(400).json({message: "Ad Not Exist"})
