@@ -163,6 +163,7 @@ module.exports = (app, db) => {
           else {
             const dataToUse = {
               _id: user._id,
+              tel: user.tel,
               ads: user.ads,
               role: user.role,
               email: user.email,
