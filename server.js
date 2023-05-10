@@ -12,7 +12,7 @@ const app = express()
 //parse les url
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-//app.use(cors({origin: '*'}))
+app.use(cors({origin: '*'}))
 
 /* app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json()) */
