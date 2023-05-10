@@ -42,6 +42,7 @@ app.use(session({
 }))
 
 app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
   if (!req.session.user) {
     req.session.user = null
     req.session.isLogged = false
