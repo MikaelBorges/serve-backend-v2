@@ -345,7 +345,8 @@ module.exports = (app, db) => {
             description: ad.description,
             location: ad.location,
             price: ad.price,
-            imagesWork: ad.imagesWork
+            imagesWork: ad.imagesWork,
+            imageUser: ad.imageUser
           }
           res.status(200).json({adRetrieved: adOfUser, message: 'Annonce trouvée'})
         }
