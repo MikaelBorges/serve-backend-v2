@@ -80,6 +80,24 @@ module.exports = (app, db) => {
     res.status(200).json({message: 'Photo de profil bien enregistrée'})
   })
 
+  /* app.post('/user/deleteAccount/:id', async (req, res, next) => {
+    const userId = req.params.id
+
+    console.log('userId')
+    console.log(userId)
+
+    userModel.findByIdAndDelete(userId, function (err) {
+      if(err) {
+        console.log('Erreur dans la suppression du compte')
+        res.status(500).json({message: 'Erreur dans la suppression du compte'})
+      }
+      else {
+        console.log('compte bien supprimé')
+        res.status(200).json({message: 'Votre compte a bien été supprimé'})
+      }
+    })
+  }) */
+
   app.post('/user/changeUserData/:id', async (req, res, next) => {
     const userId = req.params.id
     const { firstname, lastname, email, password, phone } = req.body
