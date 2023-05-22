@@ -127,6 +127,12 @@ module.exports = (app, db) => {
           imageUser: imageUser
         }
       )
+
+      await adModel.updateMany(
+        { userId: { $in: [ userId ] } },
+        { imageUser: imageUser }
+      )
+
       if(deleteImageAndFolder) {
         cloudinary.api.delete_resources_by_prefix(`users/${userId}/profile/${elementToDelete}`, async function(err) {
           if(!err) {
