@@ -100,20 +100,22 @@ module.exports = (app, db) => {
 
   app.post('/user/changeUserData/:id', async (req, res, next) => {
     const userId = req.params.id
-    const { firstname, lastname, email, password, phone } = req.body
-    console.log('userId', userId)
+    const { firstname, lastname, email, password, phone, imageUser, deleteImageAndFolder, replaceImage } = req.body
     console.log('req.body', req.body)
-    if (!email || typeof email !== 'string') {
-      return res.status(400).json({ message: 'email vide'})
-    }
-    if (!password || typeof password !== 'string') {
-      return res.status(400).json({ message: 'mot de passe vide'})
-    }
-    if (password.length < 5) {
-      return res.status(400).json({ message: 'mot de passe trop court'})
-    }
-    const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)
     try {
+      let elementToDelete
+      if(deleteImageAndFolder || !deleteImageAndFolder && replaceImage) {
+        const user = await userModel.findById(userId)
+        const tempArray = user.imageUser.split("/")
+        const lastElement = tempArray[tempArray.length - 1]
+        const file = lastElement.split(".")
+        elementToDelete = file[0]
+        console.log('IMAGE A SUPPRIMER ?', elementToDelete)
+      }
+      if (!email || typeof email !== 'string') return res.status(400).json({ message: 'email vide'})
+      if (!password || typeof password !== 'string') return res.status(400).json({ message: 'mot de passe vide'})
+      if (password.length < 5) return res.status(400).json({ message: 'mot de passe trop court'})
+      const cryptedPass = await bcrypt.hash(req.body.password, saltRounds)  
       await userModel.updateOne(
         { _id: userId },
         {
@@ -121,10 +123,37 @@ module.exports = (app, db) => {
           email: email,
           hash: cryptedPass,
           lastname: lastname,
-          firstname: firstname
+          firstname: firstname,
+          imageUser: imageUser
         }
       )
-      res.status(200).json({message: 'Votre compte a bien été modifié'})
+      if(deleteImageAndFolder) {
+        cloudinary.api.delete_resources_by_prefix(`users/${userId}/profile/${elementToDelete}`, async function(err) {
+          if(!err) {
+            console.log('Image de profil bien supprimée')
+            cloudinary.api.delete_folder(`users/${userId}/profile`, function(err) {
+              if(err) res.status(500).json({message: err})
+              else {
+                console.log('Dossier bien suprimé')
+                res.status(200).json({message: 'Image de profil et dossier bien suprimés'})
+              }
+            })
+          }
+          else res.status(500).json({message: err})
+        })
+      }
+      else {
+        if(replaceImage) {
+          cloudinary.api.delete_resources_by_prefix(`users/${userId}/profile/${elementToDelete}`, async function(err) {
+            if(!err) {
+              console.log('Ancienne image de profil bien remplacée')
+              res.status(200).json({message: 'Ancienne image de profil bien remplacée'})
+            }
+            else res.status(500).json({message: err})
+          })
+        }
+        else res.status(200).json({message: 'Nouvelle image de profil bien ajoutée'})
+      }
     }
     catch(error) {
       if (error.code === 11000) return res.status(400).json({message: 'Email déjà utilisé'})
