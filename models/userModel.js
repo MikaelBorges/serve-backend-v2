@@ -23,7 +23,7 @@ const UserSchema = mongoose.Schema(
     },
     hash: { type: String, required: true },
     role: { type: String },
-    tel: { type: String },
+    phone: { type: String },
     superUser: { type: Boolean },
     reviewsNb: { type: Number },
     starsNb: { type: Number },
