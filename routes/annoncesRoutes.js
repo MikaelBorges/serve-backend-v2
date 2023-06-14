@@ -13,9 +13,13 @@ module.exports = (app, db) => {
       for (const ad of ads) {
         const { userId } = ad;
         const user = await userModel.findById(userId);
-        const { imageUser, superUser, starsNb } = user;
-        const card = { ...ad._doc, imageUser, superUser, starsNb };
-        allCardsAds.push(card);
+        // Note : obligé de mettre ce if car un user peut etre nul et ses ads sont encore présentes
+        // Note : c'est juste le temps que je gère la suppresion des ads après la suppression d'un user
+        if (user) {
+          const { imageUser, levelUser, starsNb } = user;
+          const card = { ...ad._doc, imageUser, levelUser, starsNb };
+          allCardsAds.push(card);
+        }
       }
       return allCardsAds;
     };
@@ -26,23 +30,10 @@ module.exports = (app, db) => {
   /*---------------------------------------*/
 
   //une route post pour les nouvelles annonces
-  app.post("/user/ad/:id", async (req, res, next) => {
+  app.post("/user/ad/:userId", async (req, res, next) => {
     const year = new Date().getFullYear();
-    const {
-      tel,
-      userId,
-      title,
-      description,
-      price,
-      location,
-      firstname,
-      lastname,
-      superUser,
-      reviewsNb,
-      starsNb,
-      imageUser,
-      adHaveImages,
-    } = req.body;
+    const { title, description, price, location } = req.body;
+    const { userId } = req.params;
 
     let day = new Date().getDate(),
       hours = new Date().getHours(),
@@ -54,26 +45,19 @@ module.exports = (app, db) => {
     if (day < 10) day = `0${day}`;
     if (month < 10) month = `0${month}`;
 
-    const time = `${hours}:${minutes}`,
-      date = `${day}/${month}/${year}`,
+    const timeOfPublication = `${hours}:${minutes}`,
+      dateOfPublication = `${day}/${month}/${year}`,
       // on crée l'objet du produit
       newAd = {
-        tel: tel,
-        title: title,
-        description: description,
-        price: price,
-        userId: userId,
-        firstname: firstname,
-        lastname: lastname,
-        superUser: superUser,
-        reviewsNb: reviewsNb,
-        starsNb: starsNb,
+        title,
+        description,
+        price,
+        userId,
         favoritesNb: 0,
         views: 0,
-        imageUser: imageUser,
-        location: location,
-        dateOfPublication: date,
-        timeOfPublication: time,
+        location,
+        dateOfPublication,
+        timeOfPublication,
       };
 
     // on va instancier notre model (schema) avec l'objet
@@ -85,8 +69,8 @@ module.exports = (app, db) => {
           .json({ message: "Erreur dans l'envoi de votre annonce" });
       else {
         const adId = doc._id.toString();
-        const user = await userModel.findOne({ _id: userId });
         await userModel.updateOne({ _id: userId }, { $push: { ads: adId } });
+        /* const user = await userModel.findOne({ _id: userId });
         if (adHaveImages) {
           const adsWithImagesRetrieved = user.adsWithImages
             ? user.adsWithImages
@@ -98,7 +82,7 @@ module.exports = (app, db) => {
             { _id: userId },
             { adsWithImages: adsWithImages }
           );
-        }
+        } */
         res.status(200).json({
           message: "Votre annonce a bien été envoyée",
           adIdCreated: adId,
@@ -132,27 +116,30 @@ module.exports = (app, db) => {
       .then((result) => console.log(result));
   });
 
-  app.post("/modifyAd", async (req, res, next) => {
+  app.post("/modifyAd/:adId", async (req, res, next) => {
     const {
-      adId,
+      //adId,
       title,
       price,
-      userId,
+      //userId,
       location,
       description,
-      urlsAdImages,
-      adHaveImages,
-      compareIfSomeImagesMustBeDeleted,
+      //urlsAdImages,
+      //adHaveImages,
+      //compareIfSomeImagesMustBeDeleted,
     } = req.body;
+    const { adId } = req.params;
 
-    const imagesWork = urlsAdImages.length ? urlsAdImages : [];
-    console.log("IMAGES WORK", imagesWork);
+    console.log("adId", adId);
 
-    const ad = await adModel.findOne({ _id: adId });
-    const adHadImages = ad.imagesWork.length ? true : false;
-    console.log("AD HAD IMAGES", adHadImages);
+    /* const imagesWork = urlsAdImages.length ? urlsAdImages : [];
+    console.log("IMAGES WORK", imagesWork); */
 
-    if (compareIfSomeImagesMustBeDeleted) {
+    //const ad = await adModel.findOne({ _id: adId });
+    /* const adHadImages = ad.imagesWork.length ? true : false;
+    console.log("AD HAD IMAGES", adHadImages); */
+
+    /* if (compareIfSomeImagesMustBeDeleted) {
       const imagesWorkDb = ad.imagesWork;
       console.log("COMPARER");
       imagesWorkDb.forEach((imageWorkDb) => {
@@ -172,7 +159,7 @@ module.exports = (app, db) => {
           );
         }
       });
-    } else console.log("NE PAS COMPARER");
+    } else console.log("NE PAS COMPARER"); */
 
     await adModel.updateOne(
       { _id: adId },
@@ -180,12 +167,12 @@ module.exports = (app, db) => {
         title: title,
         price: price,
         location: location,
-        imagesWork: imagesWork,
+        //imagesWork: imagesWork,
         description: description,
       }
     );
 
-    console.log("AD HAVE IMAGES", adHaveImages);
+    /* console.log("AD HAVE IMAGES", adHaveImages);
 
     if (adHaveImages !== adHadImages) {
       const user = await userModel.findOne({ _id: userId });
@@ -205,7 +192,7 @@ module.exports = (app, db) => {
         { _id: userId },
         { adsWithImages: adsWithImages }
       );
-    }
+    } */
 
     res.status(200).json({ message: "Annonce bien modifiée" });
   });
@@ -289,7 +276,8 @@ module.exports = (app, db) => {
 
   //une route de suppression d'un produit (attention: bien prendre l'id)
   app.post("/deleteAd", async (req, res, next) => {
-    const { adId, userId, adHaveImages } = req.body;
+    //const { adId, userId, adHaveImages } = req.body;
+    const { adId, userId } = req.body;
 
     //on appel une fonction de suppression d'un produit (par son id)
     adModel.findByIdAndDelete(adId, async function (err) {
@@ -303,7 +291,7 @@ module.exports = (app, db) => {
           { $pull: { favorites: adId } }
         );
         await userModel.updateOne({ _id: userId }, { $pull: { ads: adId } });
-        if (adHaveImages) {
+        /* if (adHaveImages) {
           const user = await userModel.findOne({ _id: userId });
           cloudinary.api.delete_resources_by_prefix(
             `users/${userId}/ads/${adId}`,
@@ -329,7 +317,7 @@ module.exports = (app, db) => {
               { adsWithImages: adsWithImages }
             );
           }
-        }
+        } */
         res.status(200).json({ message: "Votre annonce a bien été suprimée" });
       }
     });
@@ -356,10 +344,10 @@ module.exports = (app, db) => {
         const { userId } = ad;
         const user = await userModel.findById(userId);
 
-        const { imageUser, superUser, starsNb, phone, firstname } = user;
+        const { imageUser, levelUser, starsNb, phone, firstname } = user;
         const userInfo = {
           imageUser,
-          superUser,
+          levelUser,
           starsNb,
           phone,
           firstname,

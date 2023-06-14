@@ -191,6 +191,7 @@ module.exports = (app, db) => {
   });
 
   app.post("/user/register", async (req, res, next) => {
+    console.log("req.body", req.body);
     const { firstname, lastname, email, password, phone } = req.body;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ message: "email vide" });
@@ -205,12 +206,13 @@ module.exports = (app, db) => {
 
     try {
       let user = {
-        tel: phone,
+        phone: phone,
         starsNb: 0,
         email: email,
         role: "user",
         reviewsNb: 0,
-        superUser: false,
+        imageUser: "",
+        levelUser: "",
         hash: cryptedPass,
         lastname: lastname,
         firstname: firstname,
@@ -228,6 +230,22 @@ module.exports = (app, db) => {
       if (error.code === 11000)
         return res.status(400).json({ message: "Email déjà utilisé" });
       throw error;
+    }
+  });
+
+  app.post("/user/identify", async (req, res, next) => {
+    console.log("req.body", req.body);
+    const { email } = req.body;
+    try {
+      let user = await userModel.findOne({ email });
+      if (user)
+        res.status(200).json({ emailExist: true, message: "L'email existe" });
+      else
+        res
+          .status(200)
+          .json({ emailExist: false, message: "L'email est introuvable" });
+    } catch (e) {
+      res.json({ status: 500, message: "Erreur du serveur!" });
     }
   });
 
@@ -251,7 +269,7 @@ module.exports = (app, db) => {
             lastname: user.lastname,
             imageUser: user.imageUser,
             reviewsNb: user.reviewsNb,
-            superUser: user.superUser,
+            levelUser: user.levelUser,
             firstname: user.firstname,
             favorites: user.favorites,
             adsWithImages: user.adsWithImages,
@@ -342,7 +360,7 @@ module.exports = (app, db) => {
         // on retourne une erreur
         res.status(400).json(null);
       } else {
-        const { imageUser, superUser, starsNb, firstname } = user;
+        const { imageUser, levelUser, starsNb, firstname } = user;
         // On récupère les annonces de l'user
         const adsOfUser = await adModel.find({ userId: id });
 
@@ -350,7 +368,7 @@ module.exports = (app, db) => {
           const buildCard = async () => {
             const allCardsAds = [];
             for (const ad of adsOfUser) {
-              const card = { ...ad._doc, imageUser, superUser, starsNb };
+              const card = { ...ad._doc, imageUser, levelUser, starsNb };
               allCardsAds.push(card);
             }
             return allCardsAds;
