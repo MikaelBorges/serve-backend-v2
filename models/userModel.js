@@ -1,4 +1,4 @@
-// Utilisation du module npm 'mongoose'
+// Utilisation du module pnpm 'mongoose'
 const mongoose = require("mongoose");
 
 // Définition du "Schéma" d'un utilisateur
