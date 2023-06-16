@@ -124,7 +124,7 @@ module.exports = (app, db) => {
         return res.status(400).json({ message: "email vide" });
       if (!password || typeof password !== "string")
         return res.status(400).json({ message: "mot de passe vide" });
-      if (password.length < 5)
+      if (password.length < 3)
         return res.status(400).json({ message: "mot de passe trop court" });
       const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
       await userModel.updateOne(
@@ -204,18 +204,24 @@ module.exports = (app, db) => {
     }
     const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
 
+    const firstLetterOfFirstname = firstname[0].toUpperCase();
+    const firstLetterOfLastname = lastname[0].toUpperCase();
+
+    const initials = firstLetterOfFirstname + firstLetterOfLastname;
+
     try {
       let user = {
-        phone: phone,
+        phone,
         starsNb: 0,
-        email: email,
+        email,
         role: "user",
         reviewsNb: 0,
         imageUser: "",
         levelUser: "",
         hash: cryptedPass,
-        lastname: lastname,
-        firstname: firstname,
+        lastname,
+        firstname,
+        initials,
       };
       const newUser = new userModel(user);
       newUser.save(function (err, doc) {
@@ -273,6 +279,7 @@ module.exports = (app, db) => {
             firstname: user.firstname,
             favorites: user.favorites,
             adsWithImages: user.adsWithImages,
+            initials: user.initials,
           };
           const payload = { _id: user._id, email: user.email };
           const token = jwt.sign(payload, secret);
@@ -360,7 +367,7 @@ module.exports = (app, db) => {
         // on retourne une erreur
         res.status(400).json(null);
       } else {
-        const { imageUser, levelUser, starsNb, firstname } = user;
+        const { imageUser, levelUser, starsNb, firstname, initials } = user;
         // On récupère les annonces de l'user
         const adsOfUser = await adModel.find({ userId: id });
 
@@ -368,7 +375,13 @@ module.exports = (app, db) => {
           const buildCard = async () => {
             const allCardsAds = [];
             for (const ad of adsOfUser) {
-              const card = { ...ad._doc, imageUser, levelUser, starsNb };
+              const card = {
+                ...ad._doc,
+                imageUser,
+                levelUser,
+                starsNb,
+                initials,
+              };
               allCardsAds.push(card);
             }
             return allCardsAds;

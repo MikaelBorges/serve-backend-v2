@@ -13,11 +13,11 @@ module.exports = (app, db) => {
       for (const ad of ads) {
         const { userId } = ad;
         const user = await userModel.findById(userId);
-        // Note : obligé de mettre ce if car un user peut etre nul et ses ads sont encore présentes
-        // Note : c'est juste le temps que je gère la suppresion des ads après la suppression d'un user
+        // Note > obligé de mettre ce if car un user peut etre nul et ses ads sont encore présentes
+        // Note > c'est juste le temps que je gère la suppresion des ads après la suppression d'un user
         if (user) {
-          const { imageUser, levelUser, starsNb } = user;
-          const card = { ...ad._doc, imageUser, levelUser, starsNb };
+          const { imageUser, levelUser, starsNb, initials } = user;
+          const card = { ...ad._doc, imageUser, levelUser, starsNb, initials };
           allCardsAds.push(card);
         }
       }

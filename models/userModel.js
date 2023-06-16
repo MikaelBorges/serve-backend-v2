@@ -32,6 +32,7 @@ const UserSchema = mongoose.Schema(
     favorites: { type: Array },
     adsWithImages: { type: Number },
     ads: { type: Array },
+    initials: { type: String },
   },
   { collection: "users" }
 );
