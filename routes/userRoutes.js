@@ -124,7 +124,7 @@ module.exports = (app, db) => {
         return res.status(400).json({ message: "email vide" });
       if (!password || typeof password !== "string")
         return res.status(400).json({ message: "mot de passe vide" });
-      if (password.length < 5)
+      if (password.length < 3)
         return res.status(400).json({ message: "mot de passe trop court" });
       const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
       await userModel.updateOne(
@@ -191,6 +191,7 @@ module.exports = (app, db) => {
   });
 
   app.post("/user/register", async (req, res, next) => {
+    console.log("req.body", req.body);
     const { firstname, lastname, email, password, phone } = req.body;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ message: "email vide" });
@@ -198,22 +199,29 @@ module.exports = (app, db) => {
     if (!password || typeof password !== "string") {
       return res.status(400).json({ message: "mot de passe vide" });
     }
-    if (password.length < 5) {
+    if (password.length < 3) {
       return res.status(400).json({ message: "mot de passe trop court" });
     }
     const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
 
+    const firstLetterOfFirstname = firstname[0].toUpperCase();
+    const firstLetterOfLastname = lastname[0].toUpperCase();
+
+    const initials = firstLetterOfFirstname + firstLetterOfLastname;
+
     try {
       let user = {
-        tel: phone,
+        phone,
         starsNb: 0,
-        email: email,
+        email,
         role: "user",
         reviewsNb: 0,
-        superUser: false,
+        imageUser: "",
+        levelUser: "",
         hash: cryptedPass,
-        lastname: lastname,
-        firstname: firstname,
+        lastname,
+        firstname,
+        initials,
       };
       const newUser = new userModel(user);
       newUser.save(function (err, doc) {
@@ -228,6 +236,22 @@ module.exports = (app, db) => {
       if (error.code === 11000)
         return res.status(400).json({ message: "Email déjà utilisé" });
       throw error;
+    }
+  });
+
+  app.post("/user/identify", async (req, res, next) => {
+    console.log("req.body", req.body);
+    const { email } = req.body;
+    try {
+      let user = await userModel.findOne({ email });
+      if (user)
+        res.status(200).json({ emailExist: true, message: "L'email existe" });
+      else
+        res
+          .status(200)
+          .json({ emailExist: false, message: "L'email est introuvable" });
+    } catch (e) {
+      res.json({ status: 500, message: "Erreur du serveur!" });
     }
   });
 
@@ -251,10 +275,11 @@ module.exports = (app, db) => {
             lastname: user.lastname,
             imageUser: user.imageUser,
             reviewsNb: user.reviewsNb,
-            superUser: user.superUser,
+            levelUser: user.levelUser,
             firstname: user.firstname,
             favorites: user.favorites,
             adsWithImages: user.adsWithImages,
+            initials: user.initials,
           };
           const payload = { _id: user._id, email: user.email };
           const token = jwt.sign(payload, secret);
@@ -277,9 +302,9 @@ module.exports = (app, db) => {
   /*---------------------------------------*/
   //route pour se déconnecter
   app.post("/user/logout", async (req, res, next) => {
-    /* console.log('le back reçoit la route de logout')
-    console.log('REQ.BODY')
-    console.log(req.body) */
+    console.log("le back reçoit la route de logout");
+    console.log("REQ.BODY");
+    console.log(req.body);
 
     /* console.log('REQ.SESSION :')
     console.log(req.session) */
@@ -291,6 +316,9 @@ module.exports = (app, db) => {
         console.log("Echec déconnexion", err);
         //res.json({status: 500, id: req.body.id, message: 'Echec déconnexion', result: err})
       } else {
+        console.log(
+          "Session détruite côté backend, déconnexion bien effectuée"
+        );
         res.json({
           _id: req.body.id,
           message: "Session détruite côté backend, déconnexion bien effectuée",
@@ -342,7 +370,7 @@ module.exports = (app, db) => {
         // on retourne une erreur
         res.status(400).json(null);
       } else {
-        const { imageUser, superUser, starsNb, firstname } = user;
+        const { imageUser, levelUser, starsNb, firstname, initials } = user;
         // On récupère les annonces de l'user
         const adsOfUser = await adModel.find({ userId: id });
 
@@ -350,7 +378,13 @@ module.exports = (app, db) => {
           const buildCard = async () => {
             const allCardsAds = [];
             for (const ad of adsOfUser) {
-              const card = { ...ad._doc, imageUser, superUser, starsNb };
+              const card = {
+                ...ad._doc,
+                imageUser,
+                levelUser,
+                starsNb,
+                initials,
+              };
               allCardsAds.push(card);
             }
             return allCardsAds;
