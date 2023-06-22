@@ -13,7 +13,7 @@ module.exports = (app, db) => {
       for (const ad of ads) {
         const { userId } = ad;
         const user = await userModel.findById(userId);
-        // Note > obligé de mettre ce if car un user peut etre nul et ses ads sont encore présentes
+        // Note > obligé de mettre ce if car un user peut etre nul et ses ads peuvent être encore présentes
         // Note > c'est juste le temps que je gère la suppresion des ads après la suppression d'un user
         if (user) {
           const { imageUser, levelUser, starsNb, initials } = user;
@@ -161,16 +161,22 @@ module.exports = (app, db) => {
       });
     } else console.log("NE PAS COMPARER"); */
 
-    await adModel.updateOne(
-      { _id: adId },
-      {
-        title: title,
-        price: price,
-        location: location,
-        //imagesWork: imagesWork,
-        description: description,
-      }
-    );
+    const ad = await adModel.findById(adId);
+    if (ad) {
+      await adModel.updateOne(
+        { _id: adId },
+        {
+          title: title,
+          price: price,
+          location: location,
+          //imagesWork: imagesWork,
+          description: description,
+        }
+      );
+      res.json({ message: "Annonce bien modifiée" });
+    } else {
+      res.status(500).json({ message: "Annonce introuvable" });
+    }
 
     /* console.log("AD HAVE IMAGES", adHaveImages);
 
@@ -193,8 +199,6 @@ module.exports = (app, db) => {
         { adsWithImages: adsWithImages }
       );
     } */
-
-    res.status(200).json({ message: "Annonce bien modifiée" });
   });
 
   /*---------------------------------------*/
@@ -275,7 +279,7 @@ module.exports = (app, db) => {
   });
 
   //une route de suppression d'un produit (attention: bien prendre l'id)
-  app.post("/deleteAd", async (req, res, next) => {
+  app.delete("/deleteAd", async (req, res, next) => {
     //const { adId, userId, adHaveImages } = req.body;
     const { adId, userId } = req.body;
 
@@ -286,6 +290,7 @@ module.exports = (app, db) => {
           .status(500)
           .json({ message: "Erreur dans la suppression de l'annonce" });
       else {
+        console.log("suppression annonce en cours");
         await userModel.updateMany(
           { favorites: { $in: [adId] } },
           { $pull: { favorites: adId } }
@@ -318,7 +323,7 @@ module.exports = (app, db) => {
             );
           }
         } */
-        res.status(200).json({ message: "Votre annonce a bien été suprimée" });
+        res.json({ message: "Votre annonce a bien été suprimée" });
       }
     });
   });
@@ -353,7 +358,7 @@ module.exports = (app, db) => {
           firstname,
         };
 
-        res.status(200).json({ ad: ad, user: userInfo, status: 200 });
+        res.json({ ad: ad, user: userInfo, status: 200 });
       } else res.status(400).json(null);
     } catch (error) {
       res.status(500).json({ message: "Erreur du serveur!" });

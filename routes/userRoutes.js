@@ -199,7 +199,7 @@ module.exports = (app, db) => {
     if (!password || typeof password !== "string") {
       return res.status(400).json({ message: "mot de passe vide" });
     }
-    if (password.length < 5) {
+    if (password.length < 3) {
       return res.status(400).json({ message: "mot de passe trop court" });
     }
     const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
@@ -302,9 +302,9 @@ module.exports = (app, db) => {
   /*---------------------------------------*/
   //route pour se déconnecter
   app.post("/user/logout", async (req, res, next) => {
-    /* console.log('le back reçoit la route de logout')
-    console.log('REQ.BODY')
-    console.log(req.body) */
+    console.log("le back reçoit la route de logout");
+    console.log("REQ.BODY");
+    console.log(req.body);
 
     /* console.log('REQ.SESSION :')
     console.log(req.session) */
@@ -316,6 +316,9 @@ module.exports = (app, db) => {
         console.log("Echec déconnexion", err);
         //res.json({status: 500, id: req.body.id, message: 'Echec déconnexion', result: err})
       } else {
+        console.log(
+          "Session détruite côté backend, déconnexion bien effectuée"
+        );
         res.json({
           _id: req.body.id,
           message: "Session détruite côté backend, déconnexion bien effectuée",
