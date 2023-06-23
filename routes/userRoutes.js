@@ -99,19 +99,20 @@ module.exports = (app, db) => {
 
   app.post("/user/changeUserData/:id", async (req, res, next) => {
     const userId = req.params.id;
+    console.log("userId", userId);
     const {
       firstname,
       lastname,
       email,
       password,
       phone,
-      imageUser,
-      deleteImageAndFolder,
-      replaceImage,
+      //imageUser,
+      //deleteImageAndFolder,
+      //replaceImage,
     } = req.body;
     console.log("req.body", req.body);
     try {
-      let elementToDelete;
+      /* let elementToDelete;
       if (deleteImageAndFolder || (!deleteImageAndFolder && replaceImage)) {
         const user = await userModel.findById(userId);
         const tempArray = user.imageUser.split("/");
@@ -119,7 +120,7 @@ module.exports = (app, db) => {
         const file = lastElement.split(".");
         elementToDelete = file[0];
         console.log("IMAGE A SUPPRIMER ?", elementToDelete);
-      }
+      } */
       if (!email || typeof email !== "string")
         return res.status(400).json({ message: "email vide" });
       if (!password || typeof password !== "string")
@@ -135,16 +136,17 @@ module.exports = (app, db) => {
           hash: cryptedPass,
           lastname: lastname,
           firstname: firstname,
-          imageUser: imageUser,
+          //imageUser: imageUser,
         }
       );
+      res.json({ message: "Compte bien modifié" });
 
-      await adModel.updateMany(
+      /* await adModel.updateMany(
         { userId: { $in: [userId] } },
         { imageUser: imageUser }
-      );
+      ); */
 
-      if (deleteImageAndFolder) {
+      /* if (deleteImageAndFolder) {
         cloudinary.api.delete_resources_by_prefix(
           `users/${userId}/profile/${elementToDelete}`,
           async function (err) {
@@ -182,7 +184,7 @@ module.exports = (app, db) => {
           res
             .status(200)
             .json({ message: "Nouvelle image de profil bien ajoutée" });
-      }
+      } */
     } catch (error) {
       if (error.code === 11000)
         return res.status(400).json({ message: "Email déjà utilisé" });
@@ -399,6 +401,34 @@ module.exports = (app, db) => {
         } else {
           res.json({ userAds: [], userFirstname: firstname, status: 200 });
         }
+      }
+    } catch (error) {
+      console.log("erreur", error);
+      res.status(500).json({ message: "Erreur du serveur!" });
+      throw error;
+    }
+  });
+
+  app.get("/retrieveUser/:id", async (req, res, next) => {
+    const id = req.params.id;
+    console.log("ID", id);
+    try {
+      // on récup le produit par son id
+      let user = await userModel.findById(id);
+      // si il ne trouve pas de user
+      if (!user) {
+        // on retourne une erreur
+        res.status(400).json(null);
+      } else {
+        const { imageUser, email, phone, firstname, lastname } = user;
+        const userInfo = {
+          imageUser,
+          lastname,
+          email,
+          phone,
+          firstname,
+        };
+        res.json({ userInfo });
       }
     } catch (error) {
       console.log("erreur", error);
