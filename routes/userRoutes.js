@@ -128,6 +128,11 @@ module.exports = (app, db) => {
       if (password.length < 3)
         return res.status(400).json({ message: "mot de passe trop court" });
       const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
+
+      const firstLetterOfFirstname = firstname[0].toUpperCase();
+      const firstLetterOfLastname = lastname[0].toUpperCase();
+      const initials = firstLetterOfFirstname + firstLetterOfLastname;
+
       await userModel.updateOne(
         { _id: userId },
         {
@@ -136,10 +141,14 @@ module.exports = (app, db) => {
           hash: cryptedPass,
           lastname: lastname,
           firstname: firstname,
+          initials: initials,
           //imageUser: imageUser,
         }
       );
-      res.json({ message: "Compte bien modifié" });
+      res.json({
+        userUpdateForContext: { firstname, initials },
+        message: "Compte bien modifié",
+      });
 
       /* await adModel.updateMany(
         { userId: { $in: [userId] } },
@@ -208,7 +217,6 @@ module.exports = (app, db) => {
 
     const firstLetterOfFirstname = firstname[0].toUpperCase();
     const firstLetterOfLastname = lastname[0].toUpperCase();
-
     const initials = firstLetterOfFirstname + firstLetterOfLastname;
 
     try {

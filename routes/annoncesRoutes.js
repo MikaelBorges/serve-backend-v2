@@ -349,13 +349,15 @@ module.exports = (app, db) => {
         const { userId } = ad;
         const user = await userModel.findById(userId);
 
-        const { imageUser, levelUser, starsNb, phone, firstname } = user;
+        const { imageUser, levelUser, starsNb, phone, firstname, initials } =
+          user;
         const userInfo = {
           imageUser,
           levelUser,
           starsNb,
           phone,
           firstname,
+          initials,
         };
 
         res.json({ ad: ad, user: userInfo, status: 200 });
