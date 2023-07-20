@@ -1,125 +1,16 @@
-// module pour crypter et comparer par un mot de passe
 const saltRounds = 10;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret = process.env.TOKEN_SECRET;
-const withAuth = require("../withAuth");
-const cloudinary = require("../utils/cloudinary");
 
 module.exports = (app, db) => {
   const userModel = require("../models/userModel");
   const adModel = require("../models/annoncesModel");
 
-  // route post d'une annonce favorite
-  app.post("/addToFavorites", withAuth, async (req, res, next) => {
-    if (req._id) console.log("id issu du token", req._id);
-    //console.log('req.body', req.body)
-    const adId = req.body.adId;
-    console.log("adId", adId);
-    const userId = req._id;
-    const user = await userModel.findOne({ _id: userId });
-    if (!user) {
-      res
-        .status(400)
-        .json({ message: "L'user à l'initiative est introuvable" });
-    } else {
-      // si absent du tableau alors on ajoute :
-      const index = user.favorites.indexOf(adId);
-      const ad = await adModel.findOne({ _id: adId });
-      if (index === -1) {
-        console.log("ajout");
-        await userModel.updateOne(
-          { _id: userId },
-          { $push: { favorites: adId } }
-        );
-        const favNb = ++ad.favoritesNb;
-        await adModel.updateOne({ _id: adId }, { favoritesNb: favNb });
-        res.status(200).json({
-          newFavNumber: favNb,
-          message: "Annonce bien ajoutée aux favoris",
-        });
-      } else {
-        console.log("suppression");
-        await userModel.updateOne(
-          { _id: userId },
-          { $pull: { favorites: adId } }
-        );
-        const favNb = --ad.favoritesNb;
-        await adModel.updateOne({ _id: adId }, { favoritesNb: favNb });
-        res.status(200).json({
-          newFavNumber: favNb,
-          message: "Annonce bien supprimée des favoris",
-        });
-      }
-    }
-  });
-
-  /*---------------------------------------*/
-
-  //route de modification d'une image
-  /* app.post('/user/updateImg', async (req, res, next) =>  {
-    const imageUser = req.body.imageUser
-    let imageRetrieved = await userModel.findOne({imageUser})
-
-    if(image === '') {
-      res.json({status: 500, error : imageRetrieved})
-    }
-
-    res.json({status: 200, result: imageRetrieved})
-  }) */
-
-  /*---------------------------------------*/
-
-  app.post("/user/registerUserImage", async (req, res, next) => {
-    const { userIdCreated, urlUserImage } = req.body;
-    await userModel.updateOne(
-      { _id: userIdCreated },
-      { imageUser: urlUserImage }
-    );
-    res.status(200).json({ message: "Photo de profil bien enregistrée" });
-  });
-
-  /* app.post('/user/deleteAccount/:id', async (req, res, next) => {
-    const userId = req.params.id
-
-    console.log('userId')
-    console.log(userId)
-
-    userModel.findByIdAndDelete(userId, function (err) {
-      if(err) {
-        console.log('Erreur dans la suppression du compte')
-        res.status(500).json({message: 'Erreur dans la suppression du compte'})
-      }
-      else {
-        console.log('compte bien supprimé')
-        res.status(200).json({message: 'Votre compte a bien été supprimé'})
-      }
-    })
-  }) */
-
   app.post("/user/changeUserData/:id", async (req, res, next) => {
     const userId = req.params.id;
-    const {
-      firstname,
-      lastname,
-      email,
-      password,
-      phone,
-      imageUser,
-      deleteImageAndFolder,
-      replaceImage,
-    } = req.body;
-    console.log("req.body", req.body);
+    const { firstname, lastname, email, password, phone } = req.body;
     try {
-      let elementToDelete;
-      if (deleteImageAndFolder || (!deleteImageAndFolder && replaceImage)) {
-        const user = await userModel.findById(userId);
-        const tempArray = user.imageUser.split("/");
-        const lastElement = tempArray[tempArray.length - 1];
-        const file = lastElement.split(".");
-        elementToDelete = file[0];
-        console.log("IMAGE A SUPPRIMER ?", elementToDelete);
-      }
       if (!email || typeof email !== "string")
         return res.status(400).json({ message: "email vide" });
       if (!password || typeof password !== "string")
@@ -127,6 +18,10 @@ module.exports = (app, db) => {
       if (password.length < 3)
         return res.status(400).json({ message: "mot de passe trop court" });
       const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
+      const firstLetterOfFirstname = firstname[0].toUpperCase();
+      const firstLetterOfLastname = lastname[0].toUpperCase();
+      const initials = firstLetterOfFirstname + firstLetterOfLastname;
+
       await userModel.updateOne(
         { _id: userId },
         {
@@ -135,54 +30,13 @@ module.exports = (app, db) => {
           hash: cryptedPass,
           lastname: lastname,
           firstname: firstname,
-          imageUser: imageUser,
+          initials: initials,
         }
       );
-
-      await adModel.updateMany(
-        { userId: { $in: [userId] } },
-        { imageUser: imageUser }
-      );
-
-      if (deleteImageAndFolder) {
-        cloudinary.api.delete_resources_by_prefix(
-          `users/${userId}/profile/${elementToDelete}`,
-          async function (err) {
-            if (!err) {
-              console.log("Image de profil bien supprimée");
-              cloudinary.api.delete_folder(
-                `users/${userId}/profile`,
-                function (err) {
-                  if (err) res.status(500).json({ message: err });
-                  else {
-                    console.log("Dossier bien suprimé");
-                    res.status(200).json({
-                      message: "Image de profil et dossier bien suprimés",
-                    });
-                  }
-                }
-              );
-            } else res.status(500).json({ message: err });
-          }
-        );
-      } else {
-        if (replaceImage) {
-          cloudinary.api.delete_resources_by_prefix(
-            `users/${userId}/profile/${elementToDelete}`,
-            async function (err) {
-              if (!err) {
-                console.log("Ancienne image de profil bien remplacée");
-                res
-                  .status(200)
-                  .json({ message: "Ancienne image de profil bien remplacée" });
-              } else res.status(500).json({ message: err });
-            }
-          );
-        } else
-          res
-            .status(200)
-            .json({ message: "Nouvelle image de profil bien ajoutée" });
-      }
+      res.json({
+        userUpdateForContext: { firstname, initials },
+        message: "Compte bien modifié",
+      });
     } catch (error) {
       if (error.code === 11000)
         return res.status(400).json({ message: "Email déjà utilisé" });
@@ -191,7 +45,6 @@ module.exports = (app, db) => {
   });
 
   app.post("/user/register", async (req, res, next) => {
-    console.log("req.body", req.body);
     const { firstname, lastname, email, password, phone } = req.body;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ message: "email vide" });
@@ -203,10 +56,8 @@ module.exports = (app, db) => {
       return res.status(400).json({ message: "mot de passe trop court" });
     }
     const cryptedPass = await bcrypt.hash(req.body.password, saltRounds);
-
     const firstLetterOfFirstname = firstname[0].toUpperCase();
     const firstLetterOfLastname = lastname[0].toUpperCase();
-
     const initials = firstLetterOfFirstname + firstLetterOfLastname;
 
     try {
@@ -239,22 +90,6 @@ module.exports = (app, db) => {
     }
   });
 
-  app.post("/user/identify", async (req, res, next) => {
-    console.log("req.body", req.body);
-    const { email } = req.body;
-    try {
-      let user = await userModel.findOne({ email });
-      if (user)
-        res.status(200).json({ emailExist: true, message: "L'email existe" });
-      else
-        res
-          .status(200)
-          .json({ emailExist: false, message: "L'email est introuvable" });
-    } catch (e) {
-      res.json({ status: 500, message: "Erreur du serveur!" });
-    }
-  });
-
   app.post("/user/login", async (req, res, next) => {
     const { email, password } = req.body;
     try {
@@ -284,7 +119,6 @@ module.exports = (app, db) => {
           const payload = { _id: user._id, email: user.email };
           const token = jwt.sign(payload, secret);
           req.session.user = dataToUse;
-          // Session à récuperer dans le header.session côté front
           req.session.isLogged = true;
           res.status(200).json({
             session: req.session,
@@ -294,86 +128,37 @@ module.exports = (app, db) => {
         }
       }
     } catch (e) {
-      console.log("e", e);
       res.json({ status: 500, message: "Erreur du serveur!" });
     }
   });
 
-  /*---------------------------------------*/
-  //route pour se déconnecter
   app.post("/user/logout", async (req, res, next) => {
-    console.log("le back reçoit la route de logout");
-    console.log("REQ.BODY");
-    console.log(req.body);
-
-    /* console.log('REQ.SESSION :')
-    console.log(req.session) */
-    /* const { id } = req.body
-    console.log('id', id) */
-
     req.session.destroy((err) => {
       if (err) {
-        console.log("Echec déconnexion", err);
-        //res.json({status: 500, id: req.body.id, message: 'Echec déconnexion', result: err})
+        res.json({
+          status: 500,
+          id: req.body.id,
+          message: "Echec déconnexion",
+          result: err,
+        });
       } else {
-        console.log(
-          "Session détruite côté backend, déconnexion bien effectuée"
-        );
         res.json({
           _id: req.body.id,
           message: "Session détruite côté backend, déconnexion bien effectuée",
         });
       }
-      // res.redirect('/user/login')
     });
   });
 
-  /*---------------------------------------*/
-
-  //route pour afficher les infos du profil
-  /* app.get('/profil', async (req, res, next)=>{
-      res.render('layout', {template: 'profil', session: req.session})
-  }) */
-
-  /*---------------------------------------*/
-
-  //route get de récup de tous les utilisateurs
-  /* app.get('/user/all', async (req, res, next)=>{
-      //la fonction find de mongoose récup les utilisateurs dans la bdd
-      userModel.find({}, ["firstname", "lastname"], (err, User) => {
-          if(err){
-              res.json({status: 500, result: err})
-          }
-          //console.log(User)
-          res.json({status: 200, result: User})
-      })
-  }) */
-
-  /*----------------------------*/
-
-  // route get des annonces de l'user
-
   app.get("/user/:id", async (req, res, next) => {
-    console.log("je reçois le get de user id");
-    console.log("req.params", req.params);
     const id = req.params.id;
-    console.log("id", id);
-    //const withLiteInfosOfUser = res.req.query.withLiteInfosOfUser
-
-    // console.log('withLiteInfosOfUser', withLiteInfosOfUser)
-
     try {
-      // on récup le produit par son id
       let user = await userModel.findById(id);
-      // si il ne trouve pas de user
       if (!user) {
-        // on retourne une erreur
         res.status(400).json(null);
       } else {
         const { imageUser, levelUser, starsNb, firstname, initials } = user;
-        // On récupère les annonces de l'user
         const adsOfUser = await adModel.find({ userId: id });
-
         if (adsOfUser.length) {
           const buildCard = async () => {
             const allCardsAds = [];
@@ -390,7 +175,6 @@ module.exports = (app, db) => {
             return allCardsAds;
           };
           const allCardsAds = await buildCard();
-          console.log("allCardsAds", allCardsAds);
           res.json({
             userAds: allCardsAds,
             userFirstname: firstname,
@@ -401,7 +185,29 @@ module.exports = (app, db) => {
         }
       }
     } catch (error) {
-      console.log("erreur", error);
+      res.status(500).json({ message: "Erreur du serveur!" });
+      throw error;
+    }
+  });
+
+  app.get("/retrieveUser/:id", async (req, res, next) => {
+    const id = req.params.id;
+    try {
+      let user = await userModel.findById(id);
+      if (!user) {
+        res.status(400).json(null);
+      } else {
+        const { imageUser, email, phone, firstname, lastname } = user;
+        const userInfo = {
+          imageUser,
+          lastname,
+          email,
+          phone,
+          firstname,
+        };
+        res.json({ userInfo });
+      }
+    } catch (error) {
       res.status(500).json({ message: "Erreur du serveur!" });
       throw error;
     }

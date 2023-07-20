@@ -1,7 +1,5 @@
-// Utilisation du module pnpm 'mongoose'
 const mongoose = require("mongoose");
 
-// Définition du "Schéma" d'un utilisateur
 const UserSchema = mongoose.Schema(
   {
     firstname: { type: String },
@@ -37,5 +35,4 @@ const UserSchema = mongoose.Schema(
   { collection: "users" }
 );
 
-// Export du Modèle mongoose représentant un objet User
 module.exports = mongoose.model("Users", UserSchema);
